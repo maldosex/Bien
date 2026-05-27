@@ -25,6 +25,7 @@ typedef struct
 }shm_general;
 
 
+
 void * atender_cliente(void * shmem);
 
 int main(){

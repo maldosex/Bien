@@ -9,6 +9,8 @@
 
 #include "api.h"
 #include "gui.h"
+#include <time.h>    
+#include <errno.h>
 
 
 typedef struct
@@ -19,6 +21,12 @@ typedef struct
 
 
 
+static int sem_wait_timeout(sem_t *sem, int segundos) {
+    struct timespec ts;
+    timespec_get(&ts, TIME_UTC);
+    ts.tv_sec += segundos;
+    return sem_timedwait(sem, &ts);
+}
 
 
 int main(){
@@ -35,10 +43,14 @@ int main(){
     //Mandar solicitud
 
     printf("Cieroo las solicitudes\n");
-    sem_wait(mutex_general);
+    //
+    if(sem_wait_timeout(mutex_general, 5) != 0){
+        printf("Servidor no disponible. Presione Enter para salir.\n");
+        getchar();
+        return 1;
+    }
 
-    //Acceder a shm_general
-    printf("Soy el proceso %d\n,", getpid());
+    printf("Soy el proceso %d\n", getpid());
 
     int shm_fd = shm_open("/shm_general", O_RDWR, 0666);
     shm_general * shm_g = mmap(NULL, sizeof(shm_general), PROT_READ|PROT_WRITE, MAP_SHARED, shm_fd, 0);
@@ -46,7 +58,12 @@ int main(){
     shm_g->pid = getpid();
     sem_post(solicitud);
     printf("Esperando respuesta\n");
-    sem_wait(respuesta);
+    if(sem_wait_timeout(respuesta, 5) != 0){
+        printf("Servidor no disponible. Presione Enter para salir.\n");
+        sem_post(mutex_general);
+        getchar();
+        return 1;
+    }
 
 
     char name_shmem[64];
