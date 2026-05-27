@@ -1,0 +1,18 @@
+[
+    {
+        "id": 1,
+        "nombre": "Leer"
+    },
+    {
+        "id": 2,
+        "nombre": "Ejercitar"
+    },
+    {
+        "id": 3,
+        "nombre": "Limpiar"
+    },
+    {
+        "id": 4,
+        "nombre": "Meditar"
+    }
+]

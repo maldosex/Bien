@@ -1,0 +1,322 @@
+#include "db.h"
+
+
+
+static pthread_mutex_t db_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+
+//Base catalogo de habitos::
+static db_usuarios_t db_usuarios;
+
+static db_habit_t db_habitos;
+
+static db_usuariohabito_t db_usuariohabitos;
+
+int db_usuarios_init(const char* filename){
+    cJSON *usuarios_json = cJSON_Parse(get_data(filename));
+
+    pthread_mutex_init(&db_usuarios.mutex, NULL);
+
+    db_usuarios.count = 0;
+
+    cJSON *usuario_json = NULL;
+
+    cJSON_ArrayForEach(usuario_json, usuarios_json){
+        int index = db_usuarios.count;
+
+        db_usuarios.usuarios[index] = usuario_from_json(usuario_json);
+
+        db_usuarios.count++;
+    }
+
+    cJSON_Delete(usuarios_json);
+    return 0;
+}
+
+int db_usuarios_get_usuario_by_username( Usuario_t *usuario, const char*username){
+    int existe = 0;
+    pthread_mutex_lock(&db_usuarios.mutex);
+        for(int i = 0; i<db_usuarios.count; i++){
+            if(strcmp(db_usuarios.usuarios[i].username, username)==0){
+                *usuario = db_usuarios.usuarios[i];
+                existe = 1;
+                break;
+            }
+        }
+    pthread_mutex_unlock(&db_usuarios.mutex);
+    return existe;
+}
+
+int db_habitos_init(const char* filename){
+    cJSON *habitos = cJSON_Parse(get_data(filename));
+
+    pthread_mutex_init(&db_habitos.mutex, NULL);
+
+    db_habitos.count = 0;
+
+    cJSON *habito = NULL;
+
+
+    cJSON_ArrayForEach(habito, habitos){
+        int index = db_habitos.count;
+
+        cJSON *id_json = cJSON_GetObjectItem(habito, "id");
+
+        cJSON *nombre_json = cJSON_GetObjectItem(habito, "nombre");
+
+        db_habitos.habitos[index].id = id_json->valueint;
+
+        strncpy(db_habitos.habitos[index].nombre, nombre_json->valuestring, sizeof(db_habitos.habitos[index].nombre));
+
+        db_habitos.count++;
+    }
+
+    cJSON_Delete(habitos);
+
+    return 0;
+}
+
+int db_habits_get(Habito * habitos, int  *count){
+
+    pthread_mutex_lock(&db_habitos.mutex);
+
+    int n = db_habitos.count;
+
+    memcpy(habitos, db_habitos.habitos, sizeof(Habito) * n);
+    *count = n;
+
+    pthread_mutex_unlock(&db_habitos.mutex);
+
+    return 0;
+}
+//nuevo::
+int db_user_register(Usuario_t usuario){
+
+    pthread_mutex_lock(&db_usuarios.mutex);
+
+    //Se verifica que no exista el usuario
+    for(int i = 0; i < db_usuarios.count; i++){
+
+        //Si existe se devuelve 1
+        if(strcmp(db_usuarios.usuarios[i].username,usuario.username) == 0){
+            pthread_mutex_unlock(&db_usuarios.mutex);
+            return 1;
+        }
+    }
+
+    //Si no existe se registra en la RAM:
+    //Se le asigna el siguiente id
+    usuario.id = db_usuarios.count + 1;
+    int index = db_usuarios.count;
+    //Se agrega al final del arreglo
+    db_usuarios.usuarios[index] = usuario;
+
+    db_usuarios.count++;
+
+    //Se formatea con json
+    cJSON *usuarios_json = cJSON_CreateArray();
+    for(int i = 0; i < db_usuarios.count; i++){
+        cJSON_AddItemToArray(usuarios_json,usuario_to_json(db_usuarios.usuarios[i]));
+    }
+
+    //Se convierte en String
+    char *json_str = cJSON_Print(usuarios_json);
+
+    //Se guarda en el archivo
+    file_db_save("src/servidor/datos.json",json_str);
+
+    //Se libera memoria
+    free(json_str);
+    cJSON_Delete(usuarios_json);
+
+    //Se libera la memoria compartida
+    pthread_mutex_unlock(&db_usuarios.mutex);
+
+    //Se devuelve cero, guardado en la base
+    return 0;
+}
+
+int db_usuariohabito_init(const char *filename){
+    cJSON *usuariohabitos = cJSON_Parse(get_data(filename));
+
+    pthread_mutex_init(&db_usuariohabitos.mutex, NULL);
+
+    db_usuariohabitos.count = 0;
+
+    cJSON *usuariohabito = NULL;
+
+
+    cJSON_ArrayForEach(usuariohabito, usuariohabitos){
+        int index = db_usuariohabitos.count;
+
+        db_usuariohabitos.usuariohabitos[index] = json_to_usuariohabito(usuariohabito);
+
+        db_usuariohabitos.count++;
+    }
+
+    cJSON_Delete(usuariohabitos);
+
+    return 0;
+}
+
+int db_usuariohabito_insert(UsuarioHabito usuariohabito){
+
+    pthread_mutex_lock(&db_usuariohabitos.mutex);
+
+    // Verificar duplicados
+    for(int i = 0; i < db_usuariohabitos.count; i++){
+
+        UsuarioHabito actual =
+            db_usuariohabitos.usuariohabitos[i];
+
+        if(
+            actual.usuario_id == usuariohabito.usuario_id &&
+            actual.habito_id == usuariohabito.habito_id
+        ){
+
+            pthread_mutex_unlock(
+                &db_usuariohabitos.mutex
+            );
+
+            return 1;
+        }
+    }
+
+    // Asignar ID
+    usuariohabito.id =
+        db_usuariohabitos.count + 1;
+
+    usuariohabito.activo = 1;
+
+    // Insertar en RAM
+    int index = db_usuariohabitos.count;
+
+    db_usuariohabitos.usuariohabitos[index] =
+        usuariohabito;
+
+    db_usuariohabitos.count++;
+
+    // Serializar arreglo completo
+    cJSON *json_array =
+        cJSON_CreateArray();
+
+    for(int i = 0;i < db_usuariohabitos.count;i++){
+
+        cJSON_AddItemToArray(json_array,usuariohabito_to_json(db_usuariohabitos.usuariohabitos[i]));
+    }
+
+    // Convertir a string
+    char *json_str = cJSON_Print(json_array);
+
+    // Guardar archivo
+    file_db_save("src/servidor/usuariohabitos.json",json_str);
+
+    // Liberar memoria
+    free(json_str);
+
+    cJSON_Delete(json_array);
+
+    pthread_mutex_unlock(
+        &db_usuariohabitos.mutex
+    );
+
+    return 0;
+}
+
+int db_habitos_get_by_usuario_id(int usuario_id,Habito *habitos,int *count){
+
+    pthread_mutex_lock(&db_usuariohabitos.mutex);
+    pthread_mutex_lock(&db_habitos.mutex);
+
+    int encontrados = 0;
+
+    for(int i = 0; i < db_usuariohabitos.count; i++){
+
+        UsuarioHabito uh =
+            db_usuariohabitos.usuariohabitos[i];
+
+        if(uh.usuario_id == usuario_id &&
+           uh.activo == 1){
+
+            for(int j = 0; j < db_habitos.count; j++){
+
+                Habito h = db_habitos.habitos[j];
+
+                if(h.id == uh.habito_id){
+
+                    habitos[encontrados] = h;
+
+                    encontrados++;
+
+                    break;
+                }
+            }
+        }
+    }
+
+    *count = encontrados;
+
+    pthread_mutex_unlock(&db_habitos.mutex);
+    pthread_mutex_unlock(&db_usuariohabitos.mutex);
+
+    return 0;
+}
+
+/*
+int db_usuariohabito_get(UsuarioHabito * usuariohabito, int *count){
+    pthread_mutex_lock(&db_usuariohabito.mutex)
+}
+
+int db_get_usuarioHabitos_by_usuario_id(UsuarioHabito * usuariohabito, int *count, ){
+    pthread_mutex_lock(&db_usuariohabito.mutex)
+}
+    */
+
+
+
+//Manejon de archivos:
+
+char * get_data(const char * filename){
+    FILE *file = fopen(filename, "r");
+    
+    if(file == NULL){
+        return(NULL);
+        printf("Error al encontrar el archivo\n");
+    }
+    
+
+    //Llevar a la posicion final el archivo
+    fseek(file, 0, SEEK_END);
+
+    //Obtener el tamaño en numero de posiciones;
+    long file_size = ftell(file);
+
+    //Regresar la  posicion al inicio
+    rewind(file);
+
+    //Asignar memoria del tamaño del archivo
+    char * buffer = (char*)malloc(file_size + 1);
+    //Si fallla la signacion
+    if(buffer == NULL){
+        fclose(file);
+        return NULL;
+    }
+
+    //Leer el archivo completo
+    fread(buffer, sizeof(char), file_size, file);
+    buffer[file_size] = '\0';
+
+    //Cerrar el archivo
+    fclose(file);
+
+    return buffer;
+}
+
+int file_db_save(const char * filename, const char * data){
+
+    FILE * file = fopen(filename, "w");
+    if(file == NULL) return 1;
+    fputs(data, file);
+    fclose(file);
+    return 0; 
+}
