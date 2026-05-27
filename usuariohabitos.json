@@ -23,24 +23,4 @@
 		"usuario_id":	4,
 		"habito_id":	1,
 		"activo":	1
-	}, {
-		"id":	6,
-		"usuario_id":	4,
-		"habito_id":	3,
-		"activo":	1
-	}, {
-		"id":	7,
-		"usuario_id":	2,
-		"habito_id":	3,
-		"activo":	1
-	}, {
-		"id":	8,
-		"usuario_id":	8,
-		"habito_id":	2,
-		"activo":	1
-	}, {
-		"id":	9,
-		"usuario_id":	8,
-		"habito_id":	4,
-		"activo":	1
 	}]

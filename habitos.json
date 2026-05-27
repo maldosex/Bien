@@ -14,5 +14,69 @@
     {
         "id": 4,
         "nombre": "Meditar"
+    },
+    {
+        "id": 5,
+        "nombre": "Tomar agua"
+    },
+    {
+        "id": 6,
+        "nombre": "Dormir temprano"
+    },
+    {
+        "id": 7,
+        "nombre": "Estudiar"
+    },
+    {
+        "id": 8,
+        "nombre": "Caminar"
+    },
+    {
+        "id": 9,
+        "nombre": "Cocinar"
+    },
+    {
+        "id": 10,
+        "nombre": "Ahorrar dinero"
+    },
+    {
+        "id": 11,
+        "nombre": "Escribir diario"
+    },
+    {
+        "id": 12,
+        "nombre": "Aprender inglés"
+    },
+    {
+        "id": 13,
+        "nombre": "Despertar temprano"
+    },
+    {
+        "id": 14,
+        "nombre": "Hacer estiramientos"
+    },
+    {
+        "id": 15,
+        "nombre": "Comer saludable"
+    },
+    {
+        "id": 16,
+        "nombre": "Escuchar podcast"
+    },
+    {
+        "id": 17,
+        "nombre": "Practicar programación"
+    },
+    {
+        "id": 18,
+        "nombre": "Ordenar habitación"
+    },
+    {
+        "id": 19,
+        "nombre": "Reducir redes sociales"
+    },
+    {
+        "id": 20,
+        "nombre": "Tomar vitaminas"
     }
 ]

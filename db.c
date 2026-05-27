@@ -123,7 +123,7 @@ int db_user_register(Usuario_t usuario){
     char *json_str = cJSON_Print(usuarios_json);
 
     //Se guarda en el archivo
-    file_db_save("src/servidor/datos.json",json_str);
+    file_db_save("datos.json",json_str);
 
     //Se libera memoria
     free(json_str);
