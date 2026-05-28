@@ -110,10 +110,16 @@ int main(){
 
                 int status = form_login(shm_p, str_usuario, str_contra);
 
-                if (status == 1)
-                    current = SCREEN_HOME;
-                else
+                if(status == -1)
                     current = SCREEN_LOGIN_MENU;
+
+                if (status == 0)
+                    current = SCREEN_HOME;
+                else if (status == 10)
+                {
+                    current = SCREEN_ADMIN_MENU;
+                }
+                
 
                 break;
             }
@@ -244,6 +250,38 @@ int main(){
                 current = SCREEN_HOME;
                 break;
             }
+
+            case SCREEN_ADMIN_MENU: {
+                int op = admin_menu();
+                if (op == 0){
+                    current = SCREEN_ADMIN_USUARIOS;
+                    break;
+                }
+                break;
+            }
+            case SCREEN_ADMIN_USUARIOS: {
+                Usuario_t usuarios[50];
+                int count = 0;
+                int selected_id = -1;
+                        
+                int status = api_get_usuarios(shm_p, usuarios, &count);
+                        
+                if(status != 0 || count == 0){
+                    clear();
+                    mvprintw(LINES/2, (COLS - 30) / 2, "No hay usuarios disponibles");
+                    mvprintw(LINES - 2, 0, "Presione cualquier tecla para volver");
+                    refresh();
+                    getch();
+                    clear();
+                    refresh();
+                } else {
+                    int op = menu_administrar_usuarios(usuarios, count, &selected_id);
+                    // aqui puedes usar selected_id para lo que necesites
+                }
+
+    current = SCREEN_HOME;
+    break;
+}
 
     }
 

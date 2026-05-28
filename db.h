@@ -37,6 +37,7 @@ typedef struct{
 
 
 int db_usuarios_init(const char *filename);
+int db_usuarios_get_all(Usuario_t *usuarios, int *count);
 int db_usuarios_get_usuario_by_username( Usuario_t *usuario, const char*username);
 
 int db_habitos_init(const char* filename);

@@ -14,7 +14,7 @@
 
 int api_login(shm_privada *shm_p, char * username, char * contra,  char *msg);
 int api_register(shm_privada *shm_p, Usuario_t usuario, char *msg, int rol);
-
+int api_get_usuarios(shm_privada *shm_p, Usuario_t *usuarios, int *count);
 int api_get_all_habits(shm_privada *shm_p, Habito * habitos, int *count);
 
 int api_register_usuariohabitos(shm_privada *shm_p, int *ids, int selected_count);

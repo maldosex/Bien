@@ -33,6 +33,17 @@ int db_usuarios_init(const char* filename){
     return 0;
 }
 
+int db_usuarios_get_all(Usuario_t *usuarios, int *count){
+    pthread_mutex_lock(&db_usuarios.mutex);
+
+    int n = db_usuarios.count;
+    memcpy(usuarios, db_usuarios.usuarios, sizeof(Usuario_t) * n);
+    *count = n;
+
+    pthread_mutex_unlock(&db_usuarios.mutex);
+    return 0;
+}
+
 int db_usuarios_get_usuario_by_username( Usuario_t *usuario, const char*username){
     int existe = 0;
     pthread_mutex_lock(&db_usuarios.mutex);

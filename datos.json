@@ -88,4 +88,14 @@
 		"peso":	70,
 		"activo":	1,
 		"rol":	1
+	}, {
+		"id":	10,
+		"username":	"irma",
+		"contra":	"2345",
+		"nombre":	"irma",
+		"apellido":	"romero",
+		"correo":	"ass@gm.co",
+		"peso":	34,
+		"activo":	1,
+		"rol":	1
 	}]

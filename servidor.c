@@ -144,7 +144,7 @@ void *atender_cliente(void *shmem){
 
 
 
-//HANDLERS_______
+//HANDLERS_______________________________
 int handle_log(cliente_contexto * cliente_ctx, char *username, char *contra){
 
     Usuario_t usuario_db;
@@ -164,12 +164,18 @@ int handle_log(cliente_contexto * cliente_ctx, char *username, char *contra){
 
         return 1;
     }
-\
     cliente_ctx->usuario_id = usuario_db.id;
     cliente_ctx->usuario_rol = usuario_db.rol;
     cliente_ctx->autenticado = 1;
-    cliente_ctx->shm->respuesta = crear_respuesta(0,"login correcto",NULL);
 
+
+    //Si el usuario es admin se devuel estatus 10
+    if(usuario_db.rol == 0){
+        cliente_ctx->shm->respuesta = crear_respuesta(10,"Login Admin",NULL);
+        return 10;
+    }
+    //Si el usuario es admin se devuelve estatus 00
+    cliente_ctx->shm->respuesta = crear_respuesta(0,"login correcto",NULL);
     return 0;
 }
 int handle_reg(Usuario_t usuario_a_registrar, Respuesta_t *respuesta){
@@ -193,7 +199,23 @@ int handle_reg(Usuario_t usuario_a_registrar, Respuesta_t *respuesta){
     return registro_estatus;
 
 }
+int handle_get_users(cliente_contexto *cliente_ctx){
+    Usuario_t usuarios[50];
+    int count = 0;
 
+    db_usuarios_get_all(usuarios, &count);
+
+    cJSON *arreglo = cJSON_CreateArray();
+    for(int i = 0; i < count; i++){
+        cJSON_AddItemToArray(arreglo, usuario_to_json(usuarios[i]));
+    }
+
+    char *data = cJSON_PrintUnformatted(arreglo);
+    cliente_ctx->shm->respuesta = crear_respuesta(0, "usuarios obtenidos", data);
+    free(data);
+    cJSON_Delete(arreglo);
+    return 0;
+}
 int handle_get_habits(cliente_contexto * cliente_ctx){
 
     Habito habitos[50];
@@ -275,11 +297,10 @@ int handle_get_user_habits(cliente_contexto *cliente_ctx){
 
     return 0;
 }
-//Router________________________________________________
+
+//___________________________________Router________________________________________________
 
 int route_request(cliente_contexto *cliente_ctx){
-
-
 
     printf("Accion recibida: %d\n", cliente_ctx->shm->solicitud.action);
     //Se identifica la accion que solicita el cliente
@@ -370,6 +391,9 @@ int route_request(cliente_contexto *cliente_ctx){
 
         case ACTION_GET_USER_HABITS:{
             return handle_get_user_habits(cliente_ctx);
+        }
+        case ACTION_GET_USUARIOS:{
+            return handle_get_users(cliente_ctx);
         }
 
 

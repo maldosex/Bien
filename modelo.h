@@ -12,6 +12,7 @@
 #define ACTION_GET_HABITS 3
 #define ACTION_ADD_USER_HABITS 4
 #define ACTION_GET_USER_HABITS 5
+#define ACTION_GET_USUARIOS 6
 
 typedef struct{
     char id;
@@ -51,7 +52,7 @@ cJSON * usuario_to_json(Usuario_t usuario);
 typedef struct{
     int estatus;
     char msg[100];
-    char data[800];
+    char data[409600];
 }Respuesta_t;
 
 Respuesta_t crear_respuesta(int estatus, const char *msg, char *data);
@@ -100,6 +101,8 @@ typedef enum {
     SCREEN_EXIT,
     SCREEN_MY_HABITS,
     SCREEN_MY_PROGRESS,
-    SCREEN_SETTINGS
+    SCREEN_SETTINGS,
+    SCREEN_ADMIN_MENU,
+    SCREEN_ADMIN_USUARIOS
 } Screen;
 #endif

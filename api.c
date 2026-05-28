@@ -21,6 +21,7 @@ int api_login(shm_privada *shm_p, char * username, char * contra,  char *msg){
 
     strcpy(msg, shm_p->respuesta.msg);
 
+    //Estatus 10 indica admin
     int estatus = shm_p->respuesta.estatus;
 
     free(req_str);
@@ -52,6 +53,39 @@ int api_register(shm_privada *shm_p, Usuario_t usuario, char *msg, int rol){
     return estatus;
 }
 
+int api_get_usuarios(shm_privada *shm_p, Usuario_t *usuarios, int *count){
+
+    Solicitud_t solicitud = crear_solicitud(ACTION_GET_USUARIOS, NULL);
+
+    shm_p->solicitud = solicitud;
+
+    sem_post(&shm_p->solicitud_lista);
+    sem_wait(&shm_p->respuesta_lista);
+
+    if(shm_p->respuesta.estatus != 0){
+        *count = 0;
+        return shm_p->respuesta.estatus;
+    }
+
+    cJSON *json_usuarios = cJSON_Parse(shm_p->respuesta.data);
+
+    if(json_usuarios == NULL || !cJSON_IsArray(json_usuarios)){
+        *count = 0;
+        return -1;
+    }
+
+    int i = 0;
+    cJSON *usuario_json = NULL;
+
+    cJSON_ArrayForEach(usuario_json, json_usuarios){
+        usuarios[i] = usuario_from_json(usuario_json);
+        i++;
+    }
+
+    *count = i;
+    cJSON_Delete(json_usuarios);
+    return 0;
+}
 
 int api_get_all_habits(shm_privada *shm_p, Habito * habitos, int *count){
 

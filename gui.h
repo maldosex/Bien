@@ -24,5 +24,7 @@ int menu_available_habits(Habito *habitos, int count, int * ids, int *selected_c
 void print_in_middle(WINDOW *win, int starty, int startx, int width, char *string, chtype color);
 
 int log_menu();
+int admin_menu();
+int menu_administrar_usuarios(Usuario_t *usuarios, int count, int *selected_id);
 bool esCorreoValido(const char *str);
 
