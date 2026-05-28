@@ -87,6 +87,37 @@ int db_habitos_init(const char* filename){
     return 0;
 }
 
+int db_habitos_insert(Habito habito){
+    pthread_mutex_lock(&db_habitos.mutex);
+
+    // Verificar duplicado por nombre
+    for(int i = 0; i < db_habitos.count; i++){
+        if(strcmp(db_habitos.habitos[i].nombre, habito.nombre) == 0){
+            pthread_mutex_unlock(&db_habitos.mutex);
+            return 1;
+        }
+    }
+
+    // Asignar ID y agregar
+    habito.id = db_habitos.count + 1;
+    db_habitos.habitos[db_habitos.count] = habito;
+    db_habitos.count++;
+
+    // Serializar y guardar
+    cJSON *arreglo = cJSON_CreateArray();
+    for(int i = 0; i < db_habitos.count; i++){
+        cJSON_AddItemToArray(arreglo, habito_to_json(db_habitos.habitos[i]));
+    }
+
+    char *json_str = cJSON_Print(arreglo);
+    file_db_save("src/servidor/habitos.json", json_str);
+
+    free(json_str);
+    cJSON_Delete(arreglo);
+    pthread_mutex_unlock(&db_habitos.mutex);
+    return 0;
+}
+
 int db_habits_get(Habito * habitos, int  *count){
 
     pthread_mutex_lock(&db_habitos.mutex);

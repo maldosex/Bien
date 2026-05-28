@@ -68,10 +68,6 @@ typedef struct{
 Solicitud_t crear_solicitud(int action,const char *data);
 
 
-
-
-
-
 typedef struct{
     sem_t solicitud_lista;
     sem_t respuesta_lista;
@@ -91,7 +87,6 @@ typedef struct{
 } cliente_contexto;
 
 
-
 typedef enum {
     SCREEN_LOGIN_MENU,
     SCREEN_LOGIN,
@@ -103,6 +98,7 @@ typedef enum {
     SCREEN_MY_PROGRESS,
     SCREEN_SETTINGS,
     SCREEN_ADMIN_MENU,
-    SCREEN_ADMIN_USUARIOS
+    SCREEN_ADMIN_USUARIOS,
+    SCREEN_ADMIN_HABITOS
 } Screen;
 #endif

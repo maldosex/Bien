@@ -26,5 +26,7 @@ void print_in_middle(WINDOW *win, int starty, int startx, int width, char *strin
 int log_menu();
 int admin_menu();
 int menu_administrar_usuarios(Usuario_t *usuarios, int count, int *selected_id);
+int menu_administrar_habitos(Habito *habitos, int count, int *selected_id);
+
 bool esCorreoValido(const char *str);
 

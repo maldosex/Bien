@@ -886,5 +886,88 @@ int menu_administrar_usuarios(Usuario_t *usuarios, int count, int *selected_id){
     return option;
 }
 
+int menu_administrar_habitos(Habito *habitos, int count, int *selected_id){
 
+    int i;
+    char choices[50][100];
+
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+
+    for(i = 0; i < count; i++){
+        snprintf(choices[i], sizeof(choices[i]), "%d - %s", habitos[i].id, habitos[i].nombre);
+    }
+
+    ITEM **my_items;
+    int c;
+    MENU *my_menu;
+    WINDOW *my_menu_win;
+    int n_choices;
+
+    n_choices = count + 1;
+    my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
+    for(i = 0; i < count; ++i){
+        my_items[i] = new_item(choices[i], "");
+    }
+    my_items[count] = NULL;
+
+    my_menu = new_menu((ITEM **)my_items);
+
+    my_menu_win = newwin(10, 40, 4, 20);
+    keypad(my_menu_win, TRUE);
+    set_menu_win(my_menu, my_menu_win);
+    set_menu_sub(my_menu, derwin(my_menu_win, 6, 38, 3, 1));
+    set_menu_format(my_menu, 5, 1);
+    set_menu_mark(my_menu, " * ");
+
+    box(my_menu_win, 0, 0);
+    print_in_middle(my_menu_win, 1, 0, 40, "---Administrar Habitos---", COLOR_PAIR(1));
+    mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+    mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
+    mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+    mvprintw(LINES - 2, 0, "F1 to exit | PgUp/PgDn para desplazarse");
+    attron(COLOR_PAIR(1));
+    mvprintw(1, 20, "Habit FLOW");
+    attroff(COLOR_PAIR(1));
+
+    menu_opts_off(my_menu, O_ONEVALUE);
+    refresh();
+    post_menu(my_menu);
+    wrefresh(my_menu_win);
+
+    int option = -1;
+    while((c = wgetch(my_menu_win)) != KEY_F(1)){
+        switch(c){
+            case KEY_DOWN:
+                menu_driver(my_menu, REQ_DOWN_ITEM);
+                break;
+            case KEY_UP:
+                menu_driver(my_menu, REQ_UP_ITEM);
+                break;
+            case KEY_NPAGE:
+                menu_driver(my_menu, REQ_SCR_DPAGE);
+                break;
+            case KEY_PPAGE:
+                menu_driver(my_menu, REQ_SCR_UPAGE);
+                break;
+            case 10: {
+                if(selected_id != NULL){
+                    int idx = item_index(current_item(my_menu));
+                    *selected_id = habitos[idx].id;
+                }
+                option = 1;
+                break;
+            }
+        }
+        wrefresh(my_menu_win);
+        if(option != -1) break;
+    }
+
+    unpost_menu(my_menu);
+    free_menu(my_menu);
+    for(i = 0; i < count; ++i)
+        free_item(my_items[i]);
+    clear();
+    refresh();
+    return option;
+}
 

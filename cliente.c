@@ -257,15 +257,19 @@ int main(){
                     current = SCREEN_ADMIN_USUARIOS;
                     break;
                 }
+                if (op == 1){
+                    current = SCREEN_ADMIN_HABITOS;
+                    break;
+                }
                 break;
             }
             case SCREEN_ADMIN_USUARIOS: {
                 Usuario_t usuarios[50];
                 int count = 0;
                 int selected_id = -1;
-                        
+
                 int status = api_get_usuarios(shm_p, usuarios, &count);
-                        
+
                 if(status != 0 || count == 0){
                     clear();
                     mvprintw(LINES/2, (COLS - 30) / 2, "No hay usuarios disponibles");
@@ -276,8 +280,37 @@ int main(){
                     refresh();
                 } else {
                     int op = menu_administrar_usuarios(usuarios, count, &selected_id);
-                    // aqui puedes usar selected_id para lo que necesites
+                    if (op == -1)
+                    {
+                        current = SCREEN_ADMIN_MENU;
+                    }
+                    
                 }
+                break;
+            }
+            case SCREEN_ADMIN_HABITOS: {
+                Habito habitos[50];
+                int count = 0;
+                int selected_id = -1;
+
+                int status = api_get_all_habits(shm_p, habitos, &count);
+
+                if(status != 0 || count == 0){
+                    clear();
+                    mvprintw(LINES/2, (COLS - 30) / 2, "No hay habitos disponibles");
+                    mvprintw(LINES - 2, 0, "Presione cualquier tecla para volver");
+                    refresh();
+                    getch();
+                    clear();
+                    refresh();
+                } else {
+                    int op = menu_administrar_habitos(habitos, count, &selected_id);
+                    if (op == -1)
+                    {
+                        current = SCREEN_ADMIN_MENU;
+                    }
+                }
+                break;
 
     current = SCREEN_HOME;
     break;

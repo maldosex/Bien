@@ -240,6 +240,8 @@ int handle_get_habits(cliente_contexto * cliente_ctx){
     return 0;
 }
 
+int handle_registrar_habito(Habito habito, Respuesta_t *respuesta);
+
 int handle_add_user_habits(cliente_contexto *cliente_ctx,int *ids,int count){
     for(int i = 0; i < count; i++){
 
