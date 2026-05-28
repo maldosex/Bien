@@ -36,6 +36,12 @@ typedef struct{
     int id;
     char username[25];
     char contra[25];
+    char nombre[25];
+    char apellido[25];
+    char correo[50];
+    int peso;
+    int activo;
+    int rol;
 }Usuario_t;
 
 Usuario_t usuario_from_json(cJSON * usuario_json);
@@ -76,6 +82,7 @@ typedef struct{
 typedef struct{
 
     int usuario_id;
+    int usuario_rol;
     int autenticado;
 
     shm_privada *shm;

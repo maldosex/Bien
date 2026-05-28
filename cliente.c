@@ -32,16 +32,13 @@ static int sem_wait_timeout(sem_t *sem, int segundos) {
 int main(){
     sem_t * mutex_general, *solicitud, *respuesta;
 
-
     //Abrir los semaforos  generales:
-
     mutex_general = sem_open("/mutex_general", 0);
     solicitud = sem_open("/solicitud", 0);
     respuesta = sem_open("/respuesta", 0);
 
 
     //Mandar solicitud
-
     printf("Soy el proceso %d\n", getpid());
     printf("Intento contactar al servidor\n");
     //
@@ -50,7 +47,6 @@ int main(){
         getchar();
         return 1;
     }
-
 
     int shm_fd = shm_open("/shm_general", O_RDWR, 0666);
     shm_general * shm_g = mmap(NULL, sizeof(shm_general), PROT_READ|PROT_WRITE, MAP_SHARED, shm_fd, 0);

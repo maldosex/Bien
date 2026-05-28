@@ -505,10 +505,10 @@ int form_login(shm_privada *shm_p, char * usuario, char * contra){
                 break;
             case 10: // Enter para aceptar
                 form_driver(my_form, REQ_VALIDATION);
-                strcpy(usuario_login.username, trim(field_buffer(field[0], 0)));
-                strcpy(    usuario_login.contra,    trim(field_buffer(field[1], 0)));
+                char *username = trim(field_buffer(field[0], 0));
+                char *contra = trim(field_buffer(field[1], 0));
                 //Se mantendra en en ciclo del formulario hasta que logra hacer login o decida salir
-                int status = api_login(shm_p,usuario_login,msg); 
+                int status = api_login(shm_p, username, contra, msg); 
                 if(status == 1) {
 					mvwprintw(my_form_win, 8, 2, "Usuario o contrasena incorrectos");
                     wrefresh(my_form_win);
@@ -538,7 +538,7 @@ int form_login(shm_privada *shm_p, char * usuario, char * contra){
 
 
 int form_register(shm_privada * shm_p){
-	FIELD *field[6];
+	FIELD *field[7];
     FORM  *my_form;
     WINDOW *my_form_win;
     int ch, rows, cols;
@@ -553,12 +553,15 @@ int form_register(shm_privada * shm_p){
     // Definición de campos
     field[0] = new_field(1, 20, 2, 14, 0, 0); // Usuario
     field[1] = new_field(1, 20, 5, 14, 0, 0); // Contraseña
-    field[2] = new_field(1, 20, 8, 14, 0, 0); // Contraseña
-    field[3] = new_field(1, 20, 11, 14, 0, 0);
-    field[4] = new_field(1, 20, 14, 14, 0, 0);
-    field[5] = NULL;
+    field[2] = new_field(1, 20, 8, 14, 0, 0); // Nombre
+    field[3] = new_field(1, 20, 11, 14, 0, 0);// Apellido
+    field[4] = new_field(1, 20, 14, 14, 0, 0); // Correo
+    field[5] = new_field(1, 20, 17, 14, 0, 0); // Peso
+    field[6] = NULL;
 
-	for(int i = 0; i<5; i++){
+    set_field_type(field[5], TYPE_INTEGER, 0, 0, 500);
+
+	for(int i = 0; i<6; i++){
 		set_field_back(field[i], COLOR_PAIR(2));
 		set_field_fore(field[i], COLOR_PAIR(3));
 		field_opts_off(field[i], O_AUTOSKIP);
@@ -592,6 +595,7 @@ int form_register(shm_privada * shm_p){
     mvwprintw(my_form_win, 10, 4, "Nombre:");
     mvwprintw(my_form_win, 13, 4, "Apellido:");
     mvwprintw(my_form_win, 16, 4, "Correo:");
+    mvwprintw(my_form_win, 19, 4, "Peso:");
 
 	set_current_field(my_form, field[0]);
 	pos_form_cursor(my_form);
@@ -638,19 +642,26 @@ int form_register(shm_privada * shm_p){
         }
     }
 
-    if(!lleno) break;  // ← salir si hay campos vacíos
+    if(!lleno) break;  // salir si hay campos vacíos
 
     if(!esCorreoValido(trim(field_buffer(field[4], 0)))){
         mvwprintw(my_form_win, 18, 4, "Vaya, eso no parece un correo  ");
         wrefresh(my_form_win);
-        break;  // ← salir si correo inválido
+        break;  //
     }
+    usuario.peso = atoi(trim(field_buffer(field[5], 0)));
 
     // Solo llega aquí si todo está lleno Y correo válido
     strcpy(usuario.username, trim(field_buffer(field[0], 0)));
     strcpy(usuario.contra,   trim(field_buffer(field[1], 0)));
+    strcpy(usuario.nombre,   trim(field_buffer(field[2], 0)));
+    strcpy(usuario.apellido,   trim(field_buffer(field[3], 0)));
+    strcpy(usuario.correo,   trim(field_buffer(field[4], 0)));
+    usuario.peso = atoi(trim(field_buffer(field[5], 0)));
+    usuario.activo = 1;
 
-    int status = api_register(shm_p, usuario, msg);
+    //1Para registrar no admin
+    int status = api_register(shm_p, usuario, msg, 1);
     if(status == 0){
         respuesta_form = 1;
         mvwprintw(my_form_win, 18, 4, "Usuario registrado, haga login ");
@@ -682,10 +693,12 @@ bool esCorreoValido(const char *str) {
     const char *arroba = strchr(str, '@');
     const char *punto = strrchr(str, '.');
 
-    // Debe contener '@' y '.', y el '.' debe estar después de la '@'
+    //'@' y '.', y el '.' debe estar después de la '@'
     if (arroba != NULL && punto != NULL && punto > arroba) {
         return true;
     }
     return false;
 }
+
+
 

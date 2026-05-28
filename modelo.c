@@ -50,42 +50,73 @@ cJSON * usuario_to_json(Usuario_t usuario){
     cJSON * usuario_json = cJSON_CreateObject();
 
     cJSON_AddNumberToObject(usuario_json,"id",usuario.id);
-
-    cJSON_AddStringToObject(usuario_json,"usuario",usuario.username);
-
+    cJSON_AddStringToObject(usuario_json,"username",usuario.username);
     cJSON_AddStringToObject(usuario_json,"contra",usuario.contra);
-
+    cJSON_AddStringToObject(usuario_json,"nombre",usuario.nombre);
+    cJSON_AddStringToObject(usuario_json,"apellido",usuario.apellido);
+    cJSON_AddStringToObject(usuario_json,"correo",usuario.correo);
+    cJSON_AddNumberToObject(usuario_json,"peso",usuario.peso);
+    cJSON_AddNumberToObject(usuario_json,"activo",usuario.activo);
+    cJSON_AddNumberToObject(usuario_json,"rol",usuario.rol);
+    
     return usuario_json;
 }
-
 Usuario_t usuario_from_json(cJSON *usuario_json){
 
     Usuario_t usuario;
 
     memset(&usuario,0,sizeof(Usuario_t));
 
-    cJSON *id_json =cJSON_GetObjectItem(usuario_json,"id");
+    cJSON *id_json = cJSON_GetObjectItem(usuario_json,"id");
+    cJSON *username_json =cJSON_GetObjectItem(usuario_json,"username");
+    cJSON *contra_json = cJSON_GetObjectItem(usuario_json,"contra");
+    cJSON *nombre_json = cJSON_GetObjectItem(usuario_json, "nombre");
 
-    cJSON *username_json =cJSON_GetObjectItem(usuario_json,"usuario");
+    cJSON *apellido_json = cJSON_GetObjectItem(usuario_json,"apellido");
+    cJSON *correo_json = cJSON_GetObjectItem(usuario_json,"correo");
+    cJSON *peso_json = cJSON_GetObjectItem(usuario_json,"peso");
+    cJSON *activo_json = cJSON_GetObjectItem(usuario_json,"activo");
+    cJSON *rol_json = cJSON_GetObjectItem(usuario_json,"rol");
 
-    cJSON *contra_json =cJSON_GetObjectItem(usuario_json,"contra");
 
     if(cJSON_IsNumber(id_json)){
-        usuario.id =id_json->valueint;
+        usuario.id = id_json->valueint;
     }
 
     if(cJSON_IsString(username_json)){
-
         strcpy(usuario.username,username_json->valuestring);
     }
 
     if(cJSON_IsString(contra_json)){
-
         strcpy(usuario.contra,contra_json->valuestring);
+    }
+
+    if(cJSON_IsString(nombre_json)){
+        strcpy(usuario.nombre, username_json->valuestring);
+    }
+
+    if(cJSON_IsString(apellido_json)){
+        strcpy(usuario.apellido,apellido_json->valuestring);
+    }
+
+    if(cJSON_IsString(correo_json)){
+        strcpy(usuario.correo ,correo_json->valuestring);
+    }
+
+    if(cJSON_IsNumber(peso_json)){
+        usuario.peso = peso_json->valueint;
+    }
+
+    if(cJSON_IsNumber(activo_json)){
+        usuario.activo = activo_json->valueint;
+    }
+    if(cJSON_IsNumber(rol_json)){
+        usuario.rol = rol_json->valueint;
     }
 
     return usuario;
 }
+
 
 Solicitud_t crear_solicitud(int action,const char *data){
 
@@ -106,8 +137,6 @@ Solicitud_t crear_solicitud(int action,const char *data){
 
     return solicitud;
 }
-
-
 Respuesta_t crear_respuesta(int estatus, const char *msg, char *data){
     Respuesta_t respuesta;
 
@@ -130,7 +159,6 @@ Respuesta_t crear_respuesta(int estatus, const char *msg, char *data){
 
     return respuesta;
 }
-
 void respuesta_to_json(Respuesta_t respuesta, cJSON * respuesta_json){
 
 

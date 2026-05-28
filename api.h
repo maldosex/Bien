@@ -12,8 +12,8 @@
 #include<string.h>
 
 
-int api_login(shm_privada *shm_p, Usuario_t usuario,char *msg);
-int api_register(shm_privada *shm_p, Usuario_t usuario, char *msg);
+int api_login(shm_privada *shm_p, char * username, char * contra,  char *msg);
+int api_register(shm_privada *shm_p, Usuario_t usuario, char *msg, int rol);
 
 int api_get_all_habits(shm_privada *shm_p, Habito * habitos, int *count);
 

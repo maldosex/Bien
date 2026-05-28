@@ -1,33 +1,91 @@
 [{
 		"id":	1,
-		"usuario":	"juan",
-		"contra":	"2345"
+		"username":	"juanx",
+		"contra":	"2345",
+		"nombre":	"juanx",
+		"apellido":	"García",
+		"correo":	"juan.garcia@mail.com",
+		"peso":	70,
+		"activo":	1,
+		"rol":	0
 	}, {
 		"id":	2,
-		"usuario":	"diego",
-		"contra":	"2345"
+		"username":	"diegor",
+		"contra":	"2345",
+		"nombre":	"diegor",
+		"apellido":	"Martínez",
+		"correo":	"diego.martinez@mail.com",
+		"peso":	75,
+		"activo":	1,
+		"rol":	1
 	}, {
 		"id":	3,
-		"usuario":	"luis",
-		"contra":	"2345"
+		"username":	"luisao",
+		"contra":	"2345",
+		"nombre":	"luisao",
+		"apellido":	"López",
+		"correo":	"luis.lopez@mail.com",
+		"peso":	68,
+		"activo":	1,
+		"rol":	0
 	}, {
 		"id":	4,
-		"usuario":	"ale",
-		"contra":	"tqoc"
+		"username":	"ale",
+		"contra":	"tqoc",
+		"nombre":	"ale",
+		"apellido":	"Hernández",
+		"correo":	"ale.hernandez@mail.com",
+		"peso":	62,
+		"activo":	1,
+		"rol":	1
 	}, {
 		"id":	5,
-		"usuario":	"ghost",
-		"contra":	"22222"
+		"username":	"ghost",
+		"contra":	"22222",
+		"nombre":	"ghost",
+		"apellido":	"Ramírez",
+		"correo":	"ghost.ramirez@mail.com",
+		"peso":	80,
+		"activo":	0,
+		"rol":	1
 	}, {
 		"id":	6,
-		"usuario":	"juanco",
-		"contra":	"dpousb"
+		"username":	"juanco",
+		"contra":	"dpousb",
+		"nombre":	"juanco",
+		"apellido":	"Torres",
+		"correo":	"juanco.torres@mail.com",
+		"peso":	73,
+		"activo":	1,
+		"rol":	1
 	}, {
 		"id":	7,
-		"usuario":	"ghost oo",
-		"contra":	"p!]"
+		"username":	"ver",
+		"contra":	"p!]",
+		"nombre":	"ver",
+		"apellido":	"Flores",
+		"correo":	"ghost.flores@mail.com",
+		"peso":	77,
+		"activo":	0,
+		"rol":	1
 	}, {
 		"id":	8,
-		"usuario":	"junito",
-		"contra":	"23456789"
+		"username":	"junito",
+		"contra":	"23456789",
+		"nombre":	"junito",
+		"apellido":	"Díaz",
+		"correo":	"junito.diaz@mail.com",
+		"peso":	65,
+		"activo":	1,
+		"rol":	1
+	}, {
+		"id":	9,
+		"username":	"maldosez",
+		"contra":	"2345",
+		"nombre":	"maldosez",
+		"apellido":	"rodrifuez",
+		"correo":	"ar@gm.co",
+		"peso":	70,
+		"activo":	1,
+		"rol":	1
 	}]

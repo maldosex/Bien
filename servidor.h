@@ -5,7 +5,7 @@
 
 
 //HANDLER___________________________________________________________
-int handle_log(cliente_contexto * cliente_ctx, Usuario_t usuario_login);
+int handle_log(cliente_contexto * cliente_ctx, char *username, char *contra);
 int handle_reg(Usuario_t usuario_login, Respuesta_t *respuesta);
 
 

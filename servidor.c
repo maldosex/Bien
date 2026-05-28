@@ -145,17 +145,17 @@ void *atender_cliente(void *shmem){
 
 
 //HANDLERS_______
-int handle_log(cliente_contexto * cliente_ctx, Usuario_t usuario_login){
+int handle_log(cliente_contexto * cliente_ctx, char *username, char *contra){
 
     Usuario_t usuario_db;
 
-    int existe = db_usuarios_get_usuario_by_username(&usuario_db, usuario_login.username);
+    int existe = db_usuarios_get_usuario_by_username(&usuario_db, username);
 
     int contra_correcta = 0;
 
     if(existe){
-        cifrar(usuario_login.contra);
-        contra_correcta = (strcmp(usuario_db.contra, usuario_login.contra) == 0);
+        cifrar(contra);
+        contra_correcta = (strcmp(usuario_db.contra, contra) == 0);
     }
 
     if(!existe || !contra_correcta){
@@ -164,16 +164,11 @@ int handle_log(cliente_contexto * cliente_ctx, Usuario_t usuario_login){
 
         return 1;
     }
-
-    cJSON *usuario_json = usuario_to_json(usuario_db);
-    char *usuario_str = cJSON_PrintUnformatted(usuario_json);
+\
     cliente_ctx->usuario_id = usuario_db.id;
+    cliente_ctx->usuario_rol = usuario_db.rol;
     cliente_ctx->autenticado = 1;
-    cliente_ctx->shm->respuesta = crear_respuesta(0,"login correcto",usuario_str);
-
-    free(usuario_str);
-
-    cJSON_Delete(usuario_json);
+    cliente_ctx->shm->respuesta = crear_respuesta(0,"login correcto",NULL);
 
     return 0;
 }
@@ -292,21 +287,24 @@ int route_request(cliente_contexto *cliente_ctx){
 
         case ACTION_LOGIN:{
 
-            cJSON * usuario_json = cJSON_Parse(cliente_ctx->shm->solicitud.data);
+            cJSON * data_json = cJSON_Parse(cliente_ctx->shm->solicitud.data);
 
             //Se valida el contenido de la solicitud
-            if(usuario_json == NULL){
-
+            if(data_json == NULL){
                 cliente_ctx->shm->respuesta = crear_respuesta(-1,"json invalido",NULL);
-
                 return -1;
             }
+            cJSON * data_username_json = cJSON_GetObjectItem(data_json, "username");
+            cJSON * data_contra_json = cJSON_GetObjectItem(data_json, "contra");
+            char username[25], contra[25];
+            strncpy(username, data_username_json->valuestring, 24);
+            strncpy(contra,   data_contra_json->valuestring,   24);
+            username[24] = '\0';
+            contra[24]   = '\0';
 
-            Usuario_t usuario_login = usuario_from_json(usuario_json);
+            cJSON_Delete(data_json);
 
-            cJSON_Delete(usuario_json);
-
-            return handle_log(cliente_ctx, usuario_login);
+            return handle_log(cliente_ctx, username, contra);
         }
 
         case ACTION_REGISTER:{

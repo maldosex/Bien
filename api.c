@@ -1,10 +1,13 @@
 #include "api.h"
 
 
-int api_login(shm_privada *shm_p, Usuario_t usuario,char *msg){
 
-    cJSON *req_json = usuario_to_json(usuario);
+int api_login(shm_privada *shm_p, char * username, char * contra,  char *msg){
 
+    cJSON *req_json = cJSON_CreateObject();
+
+    cJSON_AddStringToObject(req_json, "username", username);
+    cJSON_AddStringToObject(req_json, "contra",   contra);
 
     char *req_str =cJSON_PrintUnformatted(req_json);
 
@@ -28,8 +31,9 @@ int api_login(shm_privada *shm_p, Usuario_t usuario,char *msg){
 }
 
 
-int api_register(shm_privada *shm_p, Usuario_t usuario, char *msg){
+int api_register(shm_privada *shm_p, Usuario_t usuario, char *msg, int rol){
     
+    usuario.rol = rol;
     char * req_str = cJSON_PrintUnformatted(usuario_to_json(usuario));
 
     Solicitud_t solicitud = crear_solicitud(ACTION_REGISTER, req_str);

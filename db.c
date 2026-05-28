@@ -89,7 +89,8 @@ int db_habits_get(Habito * habitos, int  *count){
 
     return 0;
 }
-//nuevo::
+
+//Regisrtrar el usuario nuevo
 int db_user_register(Usuario_t usuario){
 
     pthread_mutex_lock(&db_usuarios.mutex);
