@@ -5,17 +5,29 @@
 	}, {
 		"id":	2,
 		"usuario":	"diego",
-		"contra":	"1234"
+		"contra":	"2345"
 	}, {
 		"id":	3,
 		"usuario":	"luis",
-		"contra":	"1234"
+		"contra":	"2345"
 	}, {
 		"id":	4,
 		"usuario":	"ale",
-		"contra":	"spnb"
+		"contra":	"tqoc"
 	}, {
 		"id":	5,
-		"usuario":	"sss",
-		"contra":	"a"
+		"usuario":	"ghost",
+		"contra":	"22222"
+	}, {
+		"id":	6,
+		"usuario":	"juanco",
+		"contra":	"dpousb"
+	}, {
+		"id":	7,
+		"usuario":	"ghost oo",
+		"contra":	"p!]"
+	}, {
+		"id":	8,
+		"usuario":	"junito",
+		"contra":	"23456789"
 	}]

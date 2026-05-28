@@ -24,7 +24,18 @@ typedef struct
 
 }shm_general;
 
+void cifrar(char *str) {
+    if (str == NULL) return;
 
+    while (*str != '\0') {
+        // Obtenemos el valor actual y le sumamos 1
+        // Nota: Si el caracter es el 255 (límite de ASCII extendido), 
+        // volverá a 0 automáticamente al ser un char.
+        *str = *str + 1; 
+        
+        str++; // Siguiente posición de memoria
+    }
+}
 
 void * atender_cliente(void * shmem);
 
@@ -143,7 +154,7 @@ int handle_log(cliente_contexto * cliente_ctx, Usuario_t usuario_login){
     int contra_correcta = 0;
 
     if(existe){
-
+        cifrar(usuario_login.contra);
         contra_correcta = (strcmp(usuario_db.contra, usuario_login.contra) == 0);
     }
 
@@ -157,7 +168,7 @@ int handle_log(cliente_contexto * cliente_ctx, Usuario_t usuario_login){
     cJSON *usuario_json = usuario_to_json(usuario_db);
     char *usuario_str = cJSON_PrintUnformatted(usuario_json);
     cliente_ctx->usuario_id = usuario_db.id;
-    cliente_ctx->autenticado =1;
+    cliente_ctx->autenticado = 1;
     cliente_ctx->shm->respuesta = crear_respuesta(0,"login correcto",usuario_str);
 
     free(usuario_str);
@@ -168,6 +179,7 @@ int handle_log(cliente_contexto * cliente_ctx, Usuario_t usuario_login){
 }
 int handle_reg(Usuario_t usuario_a_registrar, Respuesta_t *respuesta){
     //Se intenta el registro con la base de datos
+    cifrar(usuario_a_registrar.contra);
     int registro_estatus = db_user_register(usuario_a_registrar);
     char msg[50];
 

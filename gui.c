@@ -168,15 +168,13 @@ int hp_menu()
 
 	/* Print a border around the main window and print a title */
         box(my_menu_win, 0, 0);
-	print_in_middle(my_menu_win, 1, 0, 40, "Habit Flow", COLOR_PAIR(1));
+	print_in_middle(my_menu_win, 1, 0, 40, "Modulos", COLOR_PAIR(1));
 	mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
 	mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
 	mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
 	mvprintw(LINES - 2, 0, "F1 to exit");
     attron(COLOR_PAIR(1));
-    attron(A_BLINK );
-    mvprintw(1, 20, "Habit FLOW");
-    attroff(A_BLINK);
+    mvprintw(1, 35, "Bienvenido");
     attroff(COLOR_PAIR(1));
 	refresh();
         
@@ -627,38 +625,43 @@ int form_register(shm_privada * shm_p){
                 form_driver(my_form, REQ_PREV_FIELD);
                 form_driver(my_form, REQ_END_LINE);
                 break;
-            case 10: // Enter para aceptar
-                form_driver(my_form, REQ_VALIDATION);
-				if(strcmp(trim(field_buffer(field[0], 0)), "") == 0){
-					mvwprintw(my_form_win, 18, 4, "No deje espacios vacios");
-					break;
-				}
+            case 10:
+    form_driver(my_form, REQ_VALIDATION);
 
-                strcpy(usuario.username, trim(field_buffer(field[0], 0)));
-				strcpy(usuario.contra, trim(field_buffer(field[1], 0)));
-                /*
-				strcpy(usuario.nombre, trim(field_buffer(field[2], 0)));
-				strcpy(data.apellido, trim(field_buffer(field[3], 0)));
-				strcpy(data.correo, trim(field_buffer(field[4], 0)));
+    int lleno = 1;
+    for(int k = 0; k < 5; k++){
+        if(strcmp(trim(field_buffer(field[k], 0)), "") == 0){
+            mvwprintw(my_form_win, 18, 4, "No deje espacios vacios        ");
+            wrefresh(my_form_win);
+            lleno = 0;
+            break;
+        }
+    }
 
-                */
+    if(!lleno) break;  // ← salir si hay campos vacíos
 
-                int status = api_register(shm_p, usuario, msg);
-                //Si se logro el registro:
-                if(status == 0) {
-                    respuesta_form = 1;
-					mvwprintw(my_form_win, 18, 4, "Usuario Registrado, ahora haga login");
-                    wrefresh(my_form_win);
-                    getch(); /* Pausa para que el usuario lea el mensaje */
-                    goto fin;
-                }
-                else{
-                    mvwprintw(my_form_win,  18, 3, "%s", msg);
-                    wrefresh(my_form_win);
-                    /* No salimos: el usuario puede corregir y volver a intentar */
-                }
+    if(!esCorreoValido(trim(field_buffer(field[4], 0)))){
+        mvwprintw(my_form_win, 18, 4, "Vaya, eso no parece un correo  ");
+        wrefresh(my_form_win);
+        break;  // ← salir si correo inválido
+    }
 
-                break;
+    // Solo llega aquí si todo está lleno Y correo válido
+    strcpy(usuario.username, trim(field_buffer(field[0], 0)));
+    strcpy(usuario.contra,   trim(field_buffer(field[1], 0)));
+
+    int status = api_register(shm_p, usuario, msg);
+    if(status == 0){
+        respuesta_form = 1;
+        mvwprintw(my_form_win, 18, 4, "Usuario registrado, haga login ");
+        wrefresh(my_form_win);
+        getch();
+        goto fin;
+    } else {
+        mvwprintw(my_form_win, 18, 3, "%s", msg);
+        wrefresh(my_form_win);
+    }
+    break;
             default:
                 form_driver(my_form, ch);
                 break;
@@ -673,5 +676,16 @@ int form_register(shm_privada * shm_p){
         clear();
         refresh();
         return respuesta_form; // Devolvemos 1 si registro exitoso, -1 si canceló con F1
+}
+
+bool esCorreoValido(const char *str) {
+    const char *arroba = strchr(str, '@');
+    const char *punto = strrchr(str, '.');
+
+    // Debe contener '@' y '.', y el '.' debe estar después de la '@'
+    if (arroba != NULL && punto != NULL && punto > arroba) {
+        return true;
+    }
+    return false;
 }
 

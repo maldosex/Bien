@@ -42,7 +42,8 @@ int main(){
 
     //Mandar solicitud
 
-    printf("Cieroo las solicitudes\n");
+    printf("Soy el proceso %d\n", getpid());
+    printf("Intento contactar al servidor\n");
     //
     if(sem_wait_timeout(mutex_general, 5) != 0){
         printf("Servidor no disponible. Presione Enter para salir.\n");
@@ -50,14 +51,13 @@ int main(){
         return 1;
     }
 
-    printf("Soy el proceso %d\n", getpid());
 
     int shm_fd = shm_open("/shm_general", O_RDWR, 0666);
     shm_general * shm_g = mmap(NULL, sizeof(shm_general), PROT_READ|PROT_WRITE, MAP_SHARED, shm_fd, 0);
 
     shm_g->pid = getpid();
     sem_post(solicitud);
-    printf("Esperando respuesta\n");
+    printf("Solicito region de memoria compartida\n");
     if(sem_wait_timeout(respuesta, 5) != 0){
         printf("Servidor no disponible. Presione Enter para salir.\n");
         sem_post(mutex_general);
