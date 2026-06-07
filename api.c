@@ -216,6 +216,27 @@ int api_get_user_habits(shm_privada *shm_p,Habito *habitos,int *count){
     return 0;
 }
 
+
+int api_register_habit(shm_privada * shm_p, char * nombre){
+
+    cJSON * habit_json = cJSON_CreateObject();    
+    cJSON_AddStringToObject(habit_json,"nombre", nombre);
+
+    char *json_str = cJSON_PrintUnformatted(habit_json);
+
+    Solicitud_t solicitud = crear_solicitud(ACTION_REGISTER_HABIT, json_str);
+
+    shm_p->solicitud = solicitud;
+
+    sem_post(&shm_p->solicitud_lista);
+    sem_wait(&shm_p->respuesta_lista);
+
+    free(json_str);
+    cJSON_Delete(habit_json);
+    return shm_p->respuesta.estatus;
+    
+}
+
     /*
 
 

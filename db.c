@@ -110,7 +110,7 @@ int db_habitos_insert(Habito habito){
     }
 
     char *json_str = cJSON_Print(arreglo);
-    file_db_save("src/servidor/habitos.json", json_str);
+    file_db_save("habitos.json", json_str);
 
     free(json_str);
     cJSON_Delete(arreglo);
@@ -252,7 +252,7 @@ int db_usuariohabito_insert(UsuarioHabito usuariohabito){
     char *json_str = cJSON_Print(json_array);
 
     // Guardar archivo
-    file_db_save("src/servidor/usuariohabitos.json",json_str);
+    file_db_save("usuariohabitos.json",json_str);
 
     // Liberar memoria
     free(json_str);

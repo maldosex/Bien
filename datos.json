@@ -98,4 +98,14 @@
 		"peso":	34,
 		"activo":	1,
 		"rol":	1
+	}, {
+		"id":	11,
+		"username":	"damian",
+		"contra":	"2345",
+		"nombre":	"damian",
+		"apellido":	"Delgadillo",
+		"correo":	"mald@gmail.co",
+		"peso":	72,
+		"activo":	1,
+		"rol":	1
 	}]

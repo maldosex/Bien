@@ -957,6 +957,10 @@ int menu_administrar_habitos(Habito *habitos, int count, int *selected_id){
                 option = 1;
                 break;
             }
+            //si presiona n, regresamos 0, osea agregar nuevo
+            case 110:{
+                option= 0; 
+            }
         }
         wrefresh(my_menu_win);
         if(option != -1) break;
@@ -970,4 +974,139 @@ int menu_administrar_habitos(Habito *habitos, int count, int *selected_id){
     refresh();
     return option;
 }
+
+int form_register_habit(shm_privada *shm_p)
+{
+    FIELD *field[2];
+    FORM  *my_form;
+    WINDOW *win;
+    int ch, rows, cols;
+    int respuesta_form = -1;
+
+    char msg[64] = "";
+
+    // Colores
+    init_pair(1, COLOR_CYAN, COLOR_BLACK);
+    init_pair(2, COLOR_BLACK, COLOR_WHITE);
+    init_pair(3, COLOR_WHITE, COLOR_BLACK);
+    init_pair(4, COLOR_RED, COLOR_BLACK);
+    init_pair(5, COLOR_GREEN, COLOR_BLACK);
+
+    // Campo (solo nombre)
+    field[0] = new_field(1, 25, 0, 0, 0, 0);
+    field[1] = NULL;
+
+    set_field_back(field[0], COLOR_PAIR(2));
+    set_field_fore(field[0], COLOR_PAIR(3));
+    field_opts_off(field[0], O_AUTOSKIP);
+
+    my_form = new_form(field);
+    scale_form(my_form, &rows, &cols);
+
+    // Popup centrado pequeño
+    int h = 9, w = 45;
+    win = newwin(h, w, (LINES - h) / 2, (COLS - w) / 2);
+    keypad(win, TRUE);
+
+    box(win, 0, 0);
+
+    // Título
+    mvwprintw(win, 1, (w - 12) / 2, "Nuevo Habito");
+
+    // Etiqueta
+    mvwprintw(win, 3, 2, "Nombre:");
+
+    // Instrucciones
+    mvwprintw(win, 6, 2, "Enter: Guardar   Esc: Cancelar");
+
+    // Mensaje inicial
+    mvwprintw(win, 7, 2, " ");
+
+    // Conectar form con ventana
+    set_form_win(my_form, win);
+    set_form_sub(my_form, derwin(win, rows, cols, 3, 10));
+
+    post_form(my_form);
+    set_current_field(my_form, field[0]);
+    pos_form_cursor(my_form);
+
+    wrefresh(win);
+
+    while ((ch = wgetch(win))) {
+
+        switch (ch) {
+
+        case 27: // ESC
+            respuesta_form = -1;
+            goto cleanup;
+
+        case KEY_BACKSPACE:
+        case 127:
+        case 8:
+            form_driver(my_form, REQ_DEL_PREV);
+            break;
+
+        case KEY_DOWN:
+        case KEY_UP:
+            break; // solo 1 campo
+
+        case 10: { // ENTER
+            form_driver(my_form, REQ_VALIDATION);
+
+            char *nombre = trim(field_buffer(field[0], 0));
+
+            if (nombre == NULL || strlen(nombre) == 0) {
+                wattron(win, COLOR_PAIR(4));
+                mvwprintw(win, 7, 2, "Nombre no puede estar vacio");
+                wattroff(win, COLOR_PAIR(4));
+                wrefresh(win);
+                break;
+            }
+
+            int status = api_register_habit(shm_p, nombre);
+
+            if (status == 0) {
+                wattron(win, COLOR_PAIR(5));
+                mvwprintw(win, 7, 2, "Habito registrado correctamente");
+                wattroff(win, COLOR_PAIR(5));
+                wrefresh(win);
+
+                respuesta_form = 1;
+                wgetch(win);
+                goto cleanup;
+
+            } else if (status == 1) {
+                wattron(win, COLOR_PAIR(4));
+                mvwprintw(win, 7, 2, "El habito ya existe");
+                wattroff(win, COLOR_PAIR(4));
+            } else {
+                wattron(win, COLOR_PAIR(4));
+                mvwprintw(win, 7, 2, "Error al registrar habito");
+                wattroff(win, COLOR_PAIR(4));
+            }
+
+            wrefresh(win);
+            break;
+        }
+
+        default:
+            form_driver(my_form, ch);
+            break;
+        }
+    }
+
+cleanup:
+
+    unpost_form(my_form);
+    free_form(my_form);
+    free_field(field[0]);
+
+    delwin(win);
+
+    touchwin(stdscr);
+    refresh();
+
+    return respuesta_form;
+}
+
 

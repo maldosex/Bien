@@ -76,11 +76,12 @@ int main(){
 
 
     //Iniciar escucha de peticiones
+
+    printf("A esperar clientes\n");
     while(1){
-        printf("A esperar clientes\n");
         sem_wait(solicitud);
-        printf("Llego cliente: %d\n", shm_g->pid);
-        printf("Lo atiendo...\n");
+        //printf("Llego cliente: %d\n", shm_g->pid);
+        //printf("Lo atiendo...\n");
         
         //Crear memoria privada
 
@@ -123,17 +124,17 @@ void *atender_cliente(void *shmem){
 
         sem_wait(&cliente_ctxt.shm->solicitud_lista);
 
-        printf("Accion recibida: %d\n",cliente_ctxt.shm->solicitud.action);
+        //printf("Accion recibida: %d\n",cliente_ctxt.shm->solicitud.action);
 
-        printf("Data recibida: %s\n", cliente_ctxt.shm->solicitud.data);
+        //printf("Data recibida: %s\n", cliente_ctxt.shm->solicitud.data);
 
         route_request(&cliente_ctxt);
 
-        printf("Respuesta status: %d\n", cliente_ctxt.shm->respuesta.estatus);
+        //printf("Respuesta status: %d\n", cliente_ctxt.shm->respuesta.estatus);
 
-        printf("Respuesta msg: %s\n", cliente_ctxt.shm->respuesta.msg);
+        //printf("Respuesta msg: %s\n", cliente_ctxt.shm->respuesta.msg);
 
-        printf("Respuesta data: %s\n", cliente_ctxt.shm->respuesta.data);
+        //printf("Respuesta data: %s\n", cliente_ctxt.shm->respuesta.data);
 
         sem_post(&cliente_ctxt.shm->respuesta_lista);
     }
@@ -240,7 +241,33 @@ int handle_get_habits(cliente_contexto * cliente_ctx){
     return 0;
 }
 
-int handle_registrar_habito(Habito habito, Respuesta_t *respuesta);
+int handle_register_habit(cliente_contexto * cliente_ctx){
+    int status;
+    char msg[100];
+
+    cJSON * json = cJSON_Parse(cliente_ctx->shm->solicitud.data);
+    cJSON * nombre_json = cJSON_GetObjectItem(json, "nombre");
+    Habito new_habit;
+    strcpy(new_habit.nombre, nombre_json->valuestring);
+
+    status = db_habitos_insert(new_habit);
+
+    if(status == 0){
+        strcpy(msg, "Habito registrado exitosamente");
+    }
+    else if(status == 1){
+        strcpy(msg, "El habito ya existe");
+    }
+    else{
+        strcpy(msg, "Error al registrar habito");
+    }
+
+    cliente_ctx->shm->respuesta = crear_respuesta(status, msg, NULL);
+    cJSON_Delete(json);
+    return status;
+}
+
+
 
 int handle_add_user_habits(cliente_contexto *cliente_ctx,int *ids,int count){
     for(int i = 0; i < count; i++){
@@ -304,7 +331,9 @@ int handle_get_user_habits(cliente_contexto *cliente_ctx){
 
 int route_request(cliente_contexto *cliente_ctx){
 
-    printf("Accion recibida: %d\n", cliente_ctx->shm->solicitud.action);
+    //printf("Accion recibida: %d\n", cliente_ctx->shm->solicitud.action);
+
+    
     //Se identifica la accion que solicita el cliente
     switch(cliente_ctx->shm->solicitud.action){
 
@@ -348,13 +377,17 @@ int route_request(cliente_contexto *cliente_ctx){
         }
 
         case ACTION_GET_HABITS:{
-            printf("El cliente solicita obtener la lista de habitos\n");
-
+            if(cliente_ctx->usuario_rol == 1){
+                printf("Usuario %d solicita obtener la lista de habitos\n", cliente_ctx->usuario_id);
+            }
+            else{
+                printf("Admin %d solicita obtener la lista de habitos\n", cliente_ctx->usuario_id);
+            }
             handle_get_habits(cliente_ctx);
             break;
         }
-        case ACTION_ADD_USER_HABITS: {
-
+        case ACTION_ADD_USER_HABITS: {  
+            printf("Usuario %d solicita agregar habito al perfil\n", cliente_ctx->usuario_id);
             cJSON *ids_json = cJSON_Parse(cliente_ctx->shm->solicitud.data);
             
             if(ids_json == NULL){
@@ -392,10 +425,18 @@ int route_request(cliente_contexto *cliente_ctx){
         }
 
         case ACTION_GET_USER_HABITS:{
+            printf("Usuario %d solicita obtener su lista de habitos\n", cliente_ctx->usuario_id);
             return handle_get_user_habits(cliente_ctx);
         }
         case ACTION_GET_USUARIOS:{
+
+            printf("Admin %d solicita obtener la lista de usuarios\n", cliente_ctx->usuario_id);
             return handle_get_users(cliente_ctx);
+        }
+        
+        case ACTION_REGISTER_HABIT:{
+            printf("Admin %d solicita registrar habito\n", cliente_ctx->usuario_id);
+            return handle_register_habit(cliente_ctx);
         }
 
 

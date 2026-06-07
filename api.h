@@ -19,6 +19,8 @@ int api_get_all_habits(shm_privada *shm_p, Habito * habitos, int *count);
 
 int api_register_usuariohabitos(shm_privada *shm_p, int *ids, int selected_count);
 int api_get_user_habits(shm_privada *shm_p,Habito *habitos,int *count);
+int api_register_habit(shm_privada * shm_p, char * nombre);
+
 /*
 
 

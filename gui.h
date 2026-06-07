@@ -28,5 +28,7 @@ int admin_menu();
 int menu_administrar_usuarios(Usuario_t *usuarios, int count, int *selected_id);
 int menu_administrar_habitos(Habito *habitos, int count, int *selected_id);
 
+int form_register_habit(shm_privada *shm_p);
+
 bool esCorreoValido(const char *str);
 

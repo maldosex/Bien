@@ -13,6 +13,9 @@
 #define ACTION_ADD_USER_HABITS 4
 #define ACTION_GET_USER_HABITS 5
 #define ACTION_GET_USUARIOS 6
+#define ACTION_REGISTER_HABIT 7
+
+
 
 typedef struct{
     char id;

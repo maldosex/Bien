@@ -261,6 +261,10 @@ int main(){
                     current = SCREEN_ADMIN_HABITOS;
                     break;
                 }
+                if(op == -1){
+                    current = SCREEN_LOGIN;
+                    break;
+                }
                 break;
             }
             case SCREEN_ADMIN_USUARIOS: {
@@ -292,24 +296,31 @@ int main(){
                 Habito habitos[50];
                 int count = 0;
                 int selected_id = -1;
+                int status;
 
-                int status = api_get_all_habits(shm_p, habitos, &count);
-
-                if(status != 0 || count == 0){
-                    clear();
-                    mvprintw(LINES/2, (COLS - 30) / 2, "No hay habitos disponibles");
-                    mvprintw(LINES - 2, 0, "Presione cualquier tecla para volver");
-                    refresh();
-                    getch();
-                    clear();
-                    refresh();
-                } else {
-                    int op = menu_administrar_habitos(habitos, count, &selected_id);
-                    if (op == -1)
-                    {
-                        current = SCREEN_ADMIN_MENU;
-                    }
-                }
+                int op;
+                do
+                {
+                    status = api_get_all_habits(shm_p, habitos, &count);
+                    if(status != 0 || count == 0){
+                        clear();
+                        mvprintw(LINES/2, (COLS - 30) / 2, "No hay habitos disponibles");
+                        mvprintw(LINES - 2, 0, "Presione cualquier tecla para volver");
+                        refresh();
+                        getch();
+                        clear();
+                        refresh();
+                    } else {
+                        //el vcalor de returno (op) es para las acciones, (regresar, agregar, eliminar) y con el parametro selected id sse ve cual se eligio
+                        op = menu_administrar_habitos(habitos, count, &selected_id);
+                        //si selecciona agregar:
+                        //Aqui pueden agregarse mas acciones como eliminar si preciona r basandose en el actual
+                        if(op == 0){
+                            form_register_habit(shm_p);
+                        }
+                    } 
+                }while (op!= -1);
+                current = SCREEN_ADMIN_MENU;
                 break;
 
     current = SCREEN_HOME;
