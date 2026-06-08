@@ -169,15 +169,25 @@ int handle_log(cliente_contexto * cliente_ctx, char *username, char *contra){
     cliente_ctx->usuario_rol = usuario_db.rol;
     cliente_ctx->autenticado = 1;
 
+    cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "id", usuario_db.id);
+
+    char *data = cJSON_PrintUnformatted(json);
+
+    if(usuario_db.rol == 0){
 
     //Si el usuario es admin se devuel estatus 10
-    if(usuario_db.rol == 0){
-        cliente_ctx->shm->respuesta = crear_respuesta(10,"Login Admin",NULL);
-        return 10;
+        cliente_ctx->shm->respuesta = crear_respuesta(10, "Login Admin", data);
     }
+    else{
     //Si el usuario es admin se devuelve estatus 00
-    cliente_ctx->shm->respuesta = crear_respuesta(0,"login correcto",NULL);
-    return 0;
+        cliente_ctx->shm->respuesta = crear_respuesta(0, "login correcto", data);
+    }
+
+    free(data);
+    cJSON_Delete(json);
+
+    return cliente_ctx->shm->respuesta.estatus;
 }
 int handle_reg(Usuario_t usuario_a_registrar, Respuesta_t *respuesta){
     //Se intenta el registro con la base de datos
@@ -187,12 +197,12 @@ int handle_reg(Usuario_t usuario_a_registrar, Respuesta_t *respuesta){
 
     //Estatus exitoso
     if(registro_estatus == 0){
-        strcpy(msg, "Registro exitoso, haga login");
+        strcpy(msg, "Registro exitoso");
     }
 
     //El registro no fue posible, ya existe el usuario
     else if (registro_estatus == 1){
-        strcpy(msg, "Registro incorrecto, el usuario ya existe");
+        strcpy(msg, "Registro incorrecto, el username ya existe");
     }
 
 
@@ -267,7 +277,30 @@ int handle_register_habit(cliente_contexto * cliente_ctx){
     return status;
 }
 
+int handle_get_user(cliente_contexto *cliente_ctx, int id)
+{
+    Usuario_t usuario;
 
+    int status = db_usuarios_get_usuario_by_id(id, &usuario);
+
+    if (status != 0) {
+        cliente_ctx->shm->respuesta =
+            crear_respuesta(status, "Usuario no encontrado", NULL);
+        return status;
+    }
+
+    cJSON *json = usuario_to_json(usuario);
+
+    char *data = cJSON_PrintUnformatted(json);
+
+    cliente_ctx->shm->respuesta =
+        crear_respuesta(0, "Usuario obtenido", data);
+
+    free(data);
+    cJSON_Delete(json);
+
+    return 0;
+}
 
 int handle_add_user_habits(cliente_contexto *cliente_ctx,int *ids,int count){
     for(int i = 0; i < count; i++){
@@ -327,11 +360,28 @@ int handle_get_user_habits(cliente_contexto *cliente_ctx){
     return 0;
 }
 
+int handle_user_update(Usuario_t usuario, Respuesta_t * respuesta){
+    int status = db_update_user(usuario);
+    char msg[50];
+    if(status == 0){
+        strcpy(msg, "Datos actualizados");
+    }
+    else{
+        strcpy(msg, "La accion no se pudo completar");
+    }
+    *respuesta = crear_respuesta(status, msg, NULL);
+    return status;
+
+
+}
+
 //___________________________________Router________________________________________________
+
 
 int route_request(cliente_contexto *cliente_ctx){
 
-    //printf("Accion recibida: %d\n", cliente_ctx->shm->solicitud.action);
+    printf("Accion recibida: %d\n", cliente_ctx->shm->solicitud.action);
+    printf("Datos recibidos: %s\n", cliente_ctx->shm->solicitud.data);
 
     
     //Se identifica la accion que solicita el cliente
@@ -438,7 +488,55 @@ int route_request(cliente_contexto *cliente_ctx){
             printf("Admin %d solicita registrar habito\n", cliente_ctx->usuario_id);
             return handle_register_habit(cliente_ctx);
         }
+        case ACTION_UPDATE_USER:{
+            if(cliente_ctx->usuario_rol == 1){
+                printf("Usuario %d solicita modificar dots de usuario\n", cliente_ctx->usuario_id);
+            }
+            else{
+                printf("Admin %d solicita modificar datos de usuario\n", cliente_ctx->usuario_id);
+            }
+            cJSON * usuario_update_json = cJSON_Parse(cliente_ctx->shm->solicitud.data);
 
+            //Se valida el contenido de la solicitud
+            if(usuario_update_json == NULL){
+
+                cliente_ctx->shm->respuesta = crear_respuesta(-1,"json invalido",NULL);
+                return -1;
+            }
+            Usuario_t usuario_update = usuario_from_json(usuario_update_json);
+
+            cJSON_Delete(usuario_update_json);
+            
+            return handle_user_update(usuario_update, &cliente_ctx->shm->respuesta);
+
+        }
+
+        case ACTION_GET_USER: {
+
+            cJSON *json =
+                cJSON_Parse(cliente_ctx->shm->solicitud.data);
+
+            if (json == NULL) {
+                cliente_ctx->shm->respuesta =
+                    crear_respuesta(-1, "json invalido", NULL);
+                return -1;
+            }
+        
+            cJSON *id_json = cJSON_GetObjectItem(json, "id");
+        
+            if (!cJSON_IsNumber(id_json)) {
+                cJSON_Delete(json);
+                cliente_ctx->shm->respuesta =
+                    crear_respuesta(-1, "id invalido", NULL);
+                return -1;
+            }
+        
+            int id = id_json->valueint;
+        
+            cJSON_Delete(json);
+        
+            return handle_get_user(cliente_ctx, id);
+        }
 
 /*
             return handle_register(solicitud,respuesta);

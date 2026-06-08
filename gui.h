@@ -11,9 +11,10 @@
 
 char *trim(char *str);
 
-int form_login(shm_privada *shm_p, char * usuario, char * contra);
+int form_login(shm_privada *shm_p, char * usuario, char * contra,  int *my_id);
 
 int form_register(shm_privada * shm_p);
+int form_update_user(shm_privada *shm_p, Usuario_t usuario);
 
 int hp_menu();
 

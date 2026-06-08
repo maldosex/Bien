@@ -2,7 +2,7 @@
 
 
 
-int api_login(shm_privada *shm_p, char * username, char * contra,  char *msg){
+int api_login(shm_privada *shm_p, char * username, char * contra,  char *msg, int *my_id){
 
     cJSON *req_json = cJSON_CreateObject();
 
@@ -23,6 +23,20 @@ int api_login(shm_privada *shm_p, char * username, char * contra,  char *msg){
 
     //Estatus 10 indica admin
     int estatus = shm_p->respuesta.estatus;
+    if ((estatus == 0 || estatus == 10) &&
+    strlen(shm_p->respuesta.data) > 0)
+{
+    cJSON *json = cJSON_Parse(shm_p->respuesta.data);
+
+    if (json != NULL) {
+        cJSON *id = cJSON_GetObjectItem(json, "id");
+
+        if (cJSON_IsNumber(id))
+            *my_id = id->valueint;
+
+        cJSON_Delete(json);
+    }
+}
 
     free(req_str);
 
@@ -85,6 +99,64 @@ int api_get_usuarios(shm_privada *shm_p, Usuario_t *usuarios, int *count){
     *count = i;
     cJSON_Delete(json_usuarios);
     return 0;
+}
+
+//paso el id devuelve el usuario
+int api_get_usuario(shm_privada *shm_p, int id, Usuario_t *usuario){
+
+    cJSON *req_json = cJSON_CreateObject();
+
+    cJSON_AddNumberToObject(req_json, "id", id);
+
+    char *req_str = cJSON_PrintUnformatted(req_json);
+
+    Solicitud_t solicitud = crear_solicitud(ACTION_GET_USER, req_str);
+
+    shm_p->solicitud = solicitud;
+
+    sem_post(&shm_p->solicitud_lista);
+
+    sem_wait(&shm_p->respuesta_lista);
+
+    //Ya respondio el server
+
+    int status = shm_p->respuesta.estatus;
+
+    cJSON *res_json = cJSON_Parse(shm_p->respuesta.data);
+
+    if(status == 0 && res_json != NULL){
+        *usuario = usuario_from_json(res_json);
+    }
+
+    if(res_json != NULL){
+        cJSON_Delete(res_json);
+    }
+    free(req_str);
+    cJSON_Delete(req_json);
+    
+    return status;
+}
+
+int api_update_user(shm_privada *shm_p, Usuario_t usuario, char *msg)
+{
+    char *req_str = cJSON_PrintUnformatted(usuario_to_json(usuario));
+
+    Solicitud_t solicitud =
+        crear_solicitud(ACTION_UPDATE_USER, req_str);
+
+    shm_p->solicitud = solicitud;
+
+    sem_post(&shm_p->solicitud_lista);
+    sem_wait(&shm_p->respuesta_lista);
+
+    // Copiar mensaje devuelto por el servidor
+    strcpy(msg, shm_p->respuesta.msg);
+
+    int status = shm_p->respuesta.estatus;
+
+    free(req_str);
+
+    return status;
 }
 
 int api_get_all_habits(shm_privada *shm_p, Habito * habitos, int *count){

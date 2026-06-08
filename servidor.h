@@ -14,6 +14,12 @@ int handle_get_habits(cliente_contexto * cliente_ctx);
 int handle_add_user_habits(cliente_contexto *cliente_ctx,int *ids,int count);
 int handle_get_user_habits(cliente_contexto *cliente_ctx);
 
+int handle_user_set_status();
+
+int handle_user_set_password(cliente_contexto *cliente_ctx);
+
+int handle_user_update();
+
 
 
 //ROUTER____________________________________________________________

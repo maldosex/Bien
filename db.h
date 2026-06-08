@@ -39,6 +39,7 @@ typedef struct{
 int db_usuarios_init(const char *filename);
 int db_usuarios_get_all(Usuario_t *usuarios, int *count);
 int db_usuarios_get_usuario_by_username( Usuario_t *usuario, const char*username);
+int db_usuarios_get_usuario_by_id(int id, Usuario_t *usuario);
 
 int db_habitos_init(const char* filename);
 int db_habitos_insert(Habito habito);
@@ -52,6 +53,7 @@ int db_usuariohabito_insert(UsuarioHabito usuariohabito);
 
 static int db_user_exist(const char *usuario);
 int db_usuarios_existe_usuario(const char *username);
+int db_update_user(Usuario_t usuario);
 
 int db_habitos_get_by_usuario_id(int usuario_id,Habito *habitos,int *count);
 

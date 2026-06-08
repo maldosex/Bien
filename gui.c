@@ -444,7 +444,7 @@ int menu_available_habits(Habito *habitos, int count, int * ids, int *selected_c
 
 //-----------FORMULARIOS-------------------------
 
-int form_login(shm_privada *shm_p, char * usuario, char * contra){
+int form_login(shm_privada *shm_p, char * usuario, char * contra, int *my_id){
     FIELD *field[3];
     FORM  *my_form;
     WINDOW *my_form_win;
@@ -526,7 +526,7 @@ int form_login(shm_privada *shm_p, char * usuario, char * contra){
                 char *username = trim(field_buffer(field[0], 0));
                 char *contra = trim(field_buffer(field[1], 0));
                 //Se mantendra en en ciclo del formulario hasta que logra hacer login o decida salir
-                int status = api_login(shm_p, username, contra, msg); 
+                int status = api_login(shm_p, username, contra, msg, my_id); 
                 if(status == 1) {
 					mvwprintw(my_form_win, 8, 2, "Usuario o contrasena incorrectos");
                     wrefresh(my_form_win);
@@ -706,6 +706,192 @@ int form_register(shm_privada * shm_p){
         refresh();
         return respuesta_form; // Devolvemos 1 si registro exitoso, -1 si canceló con F1
 }
+
+
+
+int form_update_user(shm_privada *shm_p, Usuario_t usuario)
+{
+    FIELD *field[6];
+    FORM *my_form;
+    WINDOW *my_form_win;
+    int ch, rows, cols;
+
+    init_pair(1, COLOR_CYAN, COLOR_BLACK);
+    init_pair(2, COLOR_BLACK, COLOR_WHITE);
+    init_pair(3, COLOR_WHITE, COLOR_BLACK);
+    init_pair(4, COLOR_RED, COLOR_BLACK);
+
+    field[0] = new_field(1, 20, 2, 14, 0, 0);   // Usuario
+    field[1] = new_field(1, 20, 5, 14, 0, 0);   // Nombre
+    field[2] = new_field(1, 20, 8, 14, 0, 0);   // Apellido
+    field[3] = new_field(1, 20, 11, 14, 0, 0);  // Correo
+    field[4] = new_field(1, 20, 14, 14, 0, 0);  // Peso
+    field[5] = NULL;
+
+    set_field_type(field[4], TYPE_INTEGER, 0, 0, 500);
+
+    for (int i = 0; i < 5; i++) {
+        set_field_back(field[i], COLOR_PAIR(2));
+        set_field_fore(field[i], COLOR_PAIR(3));
+        field_opts_off(field[i], O_AUTOSKIP);
+    }
+
+    /* Precargar datos */
+
+    char peso_str[16];
+    sprintf(peso_str, "%d", usuario.peso);
+
+    set_field_buffer(field[0], 0, usuario.username);
+    set_field_buffer(field[1], 0, usuario.nombre);
+    set_field_buffer(field[2], 0, usuario.apellido);
+    set_field_buffer(field[3], 0, usuario.correo);
+    set_field_buffer(field[4], 0, peso_str);
+
+    my_form = new_form(field);
+    scale_form(my_form, &rows, &cols);
+
+    my_form_win = newwin(20, 50, (LINES - 20) / 2, (COLS - 50) / 2);
+    keypad(my_form_win, TRUE);
+
+    box(my_form_win, 0, 0);
+
+    set_form_win(my_form, my_form_win);
+    set_form_sub(my_form, derwin(my_form_win, rows, cols, 2, 2));
+
+    print_in_middle(my_form_win, 1, 0, 50,
+                    "Editar usuario", COLOR_PAIR(1));
+
+    post_form(my_form);
+
+    mvwprintw(my_form_win, 4, 4,  "Usuario:");
+    mvwprintw(my_form_win, 7, 4,  "Nombre:");
+    mvwprintw(my_form_win, 10, 4, "Apellido:");
+    mvwprintw(my_form_win, 13, 4, "Correo:");
+    mvwprintw(my_form_win, 16, 4, "Peso:");
+
+    set_current_field(my_form, field[0]);
+    pos_form_cursor(my_form);
+
+    mvprintw(LINES - 2, 2,
+             "ENTER = Guardar   F1 = Cancelar");
+
+    refresh();
+    wrefresh(my_form_win);
+
+    int respuesta_form = -1;
+    char msg[100];
+
+    while ((ch = wgetch(my_form_win))) {
+
+        switch (ch) {
+
+            case KEY_F(1):
+                goto fin;
+
+            case KEY_BACKSPACE:
+            case 127:
+            case 8:
+                form_driver(my_form, REQ_DEL_PREV);
+                break;
+
+            case KEY_DOWN:
+                form_driver(my_form, REQ_NEXT_FIELD);
+                form_driver(my_form, REQ_END_LINE);
+                break;
+
+            case KEY_UP:
+                form_driver(my_form, REQ_PREV_FIELD);
+                form_driver(my_form, REQ_END_LINE);
+                break;
+
+            case 10:
+
+                form_driver(my_form, REQ_VALIDATION);
+
+                /* Verificar campos vacíos */
+                for (int i = 0; i < 5; i++) {
+
+                    if (strcmp(trim(field_buffer(field[i], 0)), "") == 0) {
+
+                        mvwprintw(my_form_win, 18, 2,
+                                  "No deje campos vacios            ");
+                        wrefresh(my_form_win);
+                        goto continuar;
+                    }
+                }
+
+                /* Validar correo */
+                if (!esCorreoValido(trim(field_buffer(field[3], 0)))) {
+
+                    mvwprintw(my_form_win, 18, 2,
+                              "Correo invalido                  ");
+                    wrefresh(my_form_win);
+                    goto continuar;
+                }
+
+                strcpy(usuario.username,
+                       trim(field_buffer(field[0], 0)));
+
+                strcpy(usuario.nombre,
+                       trim(field_buffer(field[1], 0)));
+
+                strcpy(usuario.apellido,
+                       trim(field_buffer(field[2], 0)));
+
+                strcpy(usuario.correo,
+                       trim(field_buffer(field[3], 0)));
+
+                usuario.peso =
+                    atoi(trim(field_buffer(field[4], 0)));
+
+                if (api_update_user(shm_p, usuario, msg) == 0) {
+
+                    mvwprintw(my_form_win, 18, 2,
+                              "Usuario actualizado correctamente");
+                    wrefresh(my_form_win);
+
+                    wgetch(my_form_win);
+
+                    respuesta_form = 1;
+                    goto fin;
+                }
+
+                mvwprintw(my_form_win, 18, 2,
+                          "%-46s", msg);
+                wrefresh(my_form_win);
+
+continuar:
+                break;
+
+            default:
+                form_driver(my_form, ch);
+                break;
+        }
+    }
+
+fin:
+
+    unpost_form(my_form);
+    free_form(my_form);
+
+    for (int i = 0; i < 5; i++) {
+        free_field(field[i]);
+    }
+
+    delwin(my_form_win);
+
+    clear();
+    refresh();
+
+    return respuesta_form;
+}
+
+
+
+
+
+
+
 
 bool esCorreoValido(const char *str) {
     const char *arroba = strchr(str, '@');

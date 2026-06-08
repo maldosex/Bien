@@ -319,6 +319,56 @@ int db_get_usuarioHabitos_by_usuario_id(UsuarioHabito * usuariohabito, int *coun
 
 //Manejon de archivos:
 
+int db_update_user(Usuario_t usuario){
+    int i;
+    pthread_mutex_lock(&db_usuarios.mutex);
+    for(i = 0; i<db_usuarios.count; i++){
+        if(db_usuarios.usuarios[i].id == usuario.id){
+            break;
+        }
+    }
+    strcpy(db_usuarios.usuarios[i].nombre, usuario.nombre);
+    strcpy(db_usuarios.usuarios[i].apellido, usuario.apellido);
+    strcpy(db_usuarios.usuarios[i].correo, usuario.correo);
+    db_usuarios.usuarios[i].peso = usuario.peso;
+    cJSON *usuarios_json = cJSON_CreateArray();
+
+    for(int i = 0; i < db_usuarios.count; i++){
+        cJSON_AddItemToArray(
+            usuarios_json,
+            usuario_to_json(db_usuarios.usuarios[i])
+        );
+    }
+
+    char *json_str = cJSON_Print(usuarios_json);
+
+    file_db_save("datos.json", json_str);
+
+    free(json_str);
+    cJSON_Delete(usuarios_json);
+
+    pthread_mutex_unlock(&db_usuarios.mutex);
+
+    return 0;
+}
+
+int db_usuarios_get_usuario_by_id(int id, Usuario_t *usuario){
+    pthread_mutex_lock(&db_usuarios.mutex);
+
+    for(int i = 0; i < db_usuarios.count; i++){
+        if(db_usuarios.usuarios[i].id == id){
+            *usuario = db_usuarios.usuarios[i];
+            strcpy(usuario->contra, "");
+
+            pthread_mutex_unlock(&db_usuarios.mutex);
+            return 0;
+        }
+    }
+
+    pthread_mutex_unlock(&db_usuarios.mutex);
+    return 1;   // no encontrado
+}
+
 char * get_data(const char * filename){
     FILE *file = fopen(filename, "r");
     

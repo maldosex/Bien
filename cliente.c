@@ -78,6 +78,8 @@ int main(){
     int i = 0;
     char str_usuario[100];
     char str_contra[100];
+
+    int my_id = -1;
     
 
     initscr();
@@ -108,7 +110,7 @@ int main(){
 
             case SCREEN_LOGIN: {
 
-                int status = form_login(shm_p, str_usuario, str_contra);
+                int status = form_login(shm_p, str_usuario, str_contra, &my_id);
 
                 if(status == -1)
                     current = SCREEN_LOGIN_MENU;
@@ -236,17 +238,20 @@ int main(){
             }
 
             case SCREEN_SETTINGS: {
-                clear();
-                attron(COLOR_PAIR(1));
-                mvprintw(1, (COLS - 10) / 2, "Habit FLOW");
-                attroff(COLOR_PAIR(1));
-                mvprintw(LINES/2 - 1, (COLS - 16) / 2, "Configuracion");
-                mvprintw(LINES/2,     (COLS - 38) / 2, "Esta seccion estara disponible pronto.");
-                mvprintw(LINES - 2, 0, "Presione cualquier tecla para volver");
-                refresh();
-                getch();
-                clear();
-                refresh();
+                
+                Usuario_t me ;
+                int status = api_get_usuario(shm_p, my_id, &me);
+                printf("status=%d\n", status);
+                printf("username=%s\n", me.username);
+                printf("nombre=%s\n", me.nombre);
+                printf("apellido=%s\n", me.apellido);
+                printf("correo=%s\n", me.correo);
+                printf("peso=%d\n", me.peso);
+
+                getchar();
+                form_update_user(shm_p, me);
+
+
                 current = SCREEN_HOME;
                 break;
             }
@@ -322,10 +327,7 @@ int main(){
                 }while (op!= -1);
                 current = SCREEN_ADMIN_MENU;
                 break;
-
-    current = SCREEN_HOME;
-    break;
-}
+            }
 
     }
 
