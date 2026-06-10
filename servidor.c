@@ -29,7 +29,6 @@ void cifrar(char *str) {
 
     while (*str != '\0') {
         // Obtenemos el valor actual y le sumamos 1
-        // Nota: Si el caracter es el 255 (límite de ASCII extendido), 
         // volverá a 0 automáticamente al ser un char.
         *str = *str + 1; 
         
@@ -65,6 +64,7 @@ int main(){
     db_usuarios_init("datos.json");
     db_habitos_init("habitos.json");
     db_usuariohabito_init("usuariohabitos.json");
+    db_registros_init("registros.json");
 
     Habito habitos[50];
     int habitos_count;
@@ -72,6 +72,11 @@ int main(){
     printf("Habito 1: %s\n", habitos[0].nombre);
 
     printf("%s\n", get_data("datos.json"));
+
+    Registro_t registros[50];
+    int registros_count;
+    db_registros_get_all(registros, &registros_count);
+    printf("%s\n", cJSON_Print(registro_to_json(registros[0])));
 
 
 
@@ -375,6 +380,68 @@ int handle_user_update(Usuario_t usuario, Respuesta_t * respuesta){
 
 }
 
+int handle_registro_insert(int habito_id, int usuario_id, Respuesta_t * respuesta){
+    int registro_status = db_registro_insert(habito_id, usuario_id);
+
+    char msg[50];
+
+    if(registro_status == 0){
+        strcpy(msg, "Registro exitoso");
+    }
+    else if (registro_status == 1){
+        strcpy(msg, "Registro incorrecto");
+    }
+
+    *respuesta = crear_respuesta(registro_status, msg, NULL);
+    return registro_status;
+}
+
+int handle_get_registros_usuario(cliente_contexto *cliente_ctx)
+{
+    RegistroVista registros[100];
+    int count = 0;
+
+    int status = db_get_registros_usuario(
+        cliente_ctx->usuario_id,
+        registros,
+        &count
+    );
+
+    if(status != 0){
+        cliente_ctx->shm->respuesta =
+            crear_respuesta(
+                status,
+                "Error al obtener registros",
+                NULL
+            );
+
+        return status;
+    }
+
+    cJSON *array = cJSON_CreateArray();
+
+    for(int i = 0; i < count; i++){
+        cJSON_AddItemToArray(
+            array,
+            registrovista_to_json(registros[i])
+        );
+    }
+
+    char *data = cJSON_PrintUnformatted(array);
+
+    cliente_ctx->shm->respuesta =
+        crear_respuesta(
+            0,
+            "Registros obtenidos",
+            data
+        );
+        printf("Mando: %s\n", data);
+    free(data);
+    cJSON_Delete(array);
+
+    return 0;
+}
+
 //___________________________________Router________________________________________________
 
 
@@ -536,6 +603,26 @@ int route_request(cliente_contexto *cliente_ctx){
             cJSON_Delete(json);
         
             return handle_get_user(cliente_ctx, id);
+        }
+
+        case ACTION_INSERT_REGISTRO:{
+            printf("El usuario %d inserta un registro\n", cliente_ctx->usuario_id);
+            cJSON * data_json = cJSON_Parse(cliente_ctx->shm->solicitud.data);
+
+            cJSON * usuario_id_json =cJSON_GetObjectItem(data_json, "usuario_id");
+            cJSON * habito_id_json =cJSON_GetObjectItem(data_json, "habito_id");
+
+            int usuario_id = usuario_id_json->valueint;
+            int habito_id = habito_id_json->valueint;
+            printf("En router user %d habit %d\n",usuario_id, habito_id);
+
+
+            return handle_registro_insert(habito_id, usuario_id, &cliente_ctx->shm->respuesta);
+        }
+
+        case ACTION_GET_REGISTROS_USUARIO:{
+            printf("Usuario %d solicita sus registros\n",cliente_ctx->usuario_id);
+            return handle_get_registros_usuario(cliente_ctx);
         }
 
 /*

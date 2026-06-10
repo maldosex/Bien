@@ -235,7 +235,7 @@ int hp_menu()
 
 //(Habito *habitos, int count, int * ids, int *selected_count)
 
-int menu_my_habits(Habito *habitos, int count, int * ids, int *selected_count){
+int menu_my_habits(shm_privada * shm_p, Habito *habitos, int count, int * ids, int *selected_count, int my_id){
 
     int i;
     char choices[30][100];
@@ -310,20 +310,36 @@ int menu_my_habits(Habito *habitos, int count, int * ids, int *selected_count){
 				break;
         	case 10: {
 
-    if(ids != NULL && selected_count != NULL){
-        ITEM **items = menu_items(my_menu);
-        int seleccionados = 0;
-        for(i = 0; i < item_count(my_menu); i++){
-            if(item_value(items[i]) == TRUE){
-                ids[seleccionados] = habitos[i].id;
-                seleccionados++;
+                if(ids != NULL && selected_count != NULL){
+                    ITEM **items = menu_items(my_menu);
+                    int seleccionados = 0;
+                    for(i = 0; i < item_count(my_menu); i++){
+                        if(item_value(items[i]) == TRUE){
+                            ids[seleccionados] = habitos[i].id;
+                            seleccionados++;
+                        }
+                    }
+                    *selected_count = seleccionados;
+                }
+                option = 1;
+                break;
             }
-        }
-        *selected_count = seleccionados;
-    }
-    option = 1;
-    break;
-}
+            case 'r':{
+                ITEM *current = current_item(my_menu);
+
+                int index = item_index(current);
+
+                char msg[100];
+
+                api_insert_registro(
+                    shm_p, my_id,
+                    habitos[index].id,
+                    msg
+                );
+            
+                break;
+                
+            }
 		}
         wrefresh(my_menu_win);
 		if (option != -1) {
@@ -343,6 +359,7 @@ int menu_my_habits(Habito *habitos, int count, int * ids, int *selected_count){
     refresh();
 	return option;
 }
+
 
 int menu_available_habits(Habito *habitos, int count, int * ids, int *selected_count){
     int i;
@@ -438,6 +455,155 @@ int menu_available_habits(Habito *habitos, int count, int * ids, int *selected_c
     clear();
     refresh();
     return option;
+}
+
+int menu_my_progress(
+    RegistroVista *registros,
+    int count
+){
+
+    int i;
+    int c;
+
+    char choices[100][120];
+
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+
+    for(i = 0; i < count; i++){
+
+        snprintf(
+            choices[i],
+            sizeof(choices[i]),
+            "%s - %s",
+            registros[i].fecha,
+            registros[i].nombre_habito
+        );
+    }
+
+    ITEM **my_items;
+    MENU *my_menu;
+    WINDOW *my_menu_win;
+
+    my_items = (ITEM **)calloc(count + 1, sizeof(ITEM *));
+
+    for(i = 0; i < count; i++){
+
+        my_items[i] =
+            new_item(
+                choices[i],
+                ""
+            );
+    }
+
+    my_items[count] = NULL;
+
+    my_menu = new_menu(my_items);
+
+    my_menu_win = newwin(12, 50, 4, 20);
+
+    keypad(my_menu_win, TRUE);
+
+    set_menu_win(my_menu, my_menu_win);
+
+    set_menu_sub(
+        my_menu,
+        derwin(
+            my_menu_win,
+            8,
+            48,
+            3,
+            1
+        )
+    );
+
+    set_menu_format(
+        my_menu,
+        8,
+        1
+    );
+
+    set_menu_mark(my_menu, " ");
+
+    box(my_menu_win, 0, 0);
+
+    print_in_middle(
+        my_menu_win,
+        1,
+        0,
+        50,
+        "----- Mi progreso -----",
+        COLOR_PAIR(1)
+    );
+
+    mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+    mvwhline(my_menu_win, 2, 1, ACS_HLINE, 48);
+    mvwaddch(my_menu_win, 2, 49, ACS_RTEE);
+
+    mvprintw(
+        LINES - 2,
+        0,
+        "F1 para volver | PgUp/PgDn para desplazarse"
+    );
+
+    refresh();
+
+    post_menu(my_menu);
+
+    wrefresh(my_menu_win);
+
+    while((c = wgetch(my_menu_win)) != KEY_F(1)){
+
+        switch(c){
+
+            case KEY_DOWN:
+                menu_driver(
+                    my_menu,
+                    REQ_DOWN_ITEM
+                );
+                break;
+
+            case KEY_UP:
+                menu_driver(
+                    my_menu,
+                    REQ_UP_ITEM
+                );
+                break;
+
+            case KEY_NPAGE:
+                menu_driver(
+                    my_menu,
+                    REQ_SCR_DPAGE
+                );
+                break;
+
+            case KEY_PPAGE:
+                menu_driver(
+                    my_menu,
+                    REQ_SCR_UPAGE
+                );
+                break;
+        }
+
+        wrefresh(my_menu_win);
+    }
+
+    unpost_menu(my_menu);
+
+    free_menu(my_menu);
+
+    for(i = 0; i < count; i++){
+
+        free_item(my_items[i]);
+    }
+
+    free(my_items);
+
+    delwin(my_menu_win);
+
+    clear();
+    refresh();
+
+    return 0;
 }
 //---------------------_____________________________
 
@@ -564,8 +730,8 @@ int form_register(shm_privada * shm_p){
 
 
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);    // titulo
-	init_pair(2, COLOR_BLACK, COLOR_WHITE);   // campo activo
-	init_pair(3, COLOR_WHITE, COLOR_BLACK);   // texto
+	init_pair(2, COLOR_RED, COLOR_BLUE);   // campo activo
+	init_pair(3, COLOR_WHITE, COLOR_BLUE);   // texto
 	init_pair(4, COLOR_RED, COLOR_BLACK);     // borde
 
     // Definición de campos
@@ -592,7 +758,7 @@ int form_register(shm_privada * shm_p){
     scale_form(my_form, &rows, &cols);
 
     // Crear ventana centrada
-    my_form_win = newwin(20, 50, (LINES-20)/2, (COLS-50)/2);
+    my_form_win = newwin(22, 50, (LINES-24)/2, (COLS-50)/2);
     keypad(my_form_win, TRUE);
 
 	wattron(my_form_win, COLOR_PAIR(3));
@@ -602,7 +768,7 @@ int form_register(shm_privada * shm_p){
     set_form_win(my_form, my_form_win);
     set_form_sub(my_form, derwin(my_form_win, rows, cols, 2, 2));
 
-    print_in_middle(my_form_win, 1, 0, 50, "Register", COLOR_PAIR(1));
+    print_in_middle(my_form_win, 1, 0, 50, "Registrar Usuario", COLOR_PAIR(1));
     
     post_form(my_form);
 
@@ -647,50 +813,66 @@ int form_register(shm_privada * shm_p){
                 form_driver(my_form, REQ_PREV_FIELD);
                 form_driver(my_form, REQ_END_LINE);
                 break;
-            case 10:
-    form_driver(my_form, REQ_VALIDATION);
+            case 10:{
+                form_driver(my_form, REQ_VALIDATION);
 
-    int lleno = 1;
-    for(int k = 0; k < 5; k++){
-        if(strcmp(trim(field_buffer(field[k], 0)), "") == 0){
-            mvwprintw(my_form_win, 18, 4, "No deje espacios vacios        ");
-            wrefresh(my_form_win);
-            lleno = 0;
-            break;
-        }
-    }
+                int lleno = 1;
+                for(int k = 0; k < 5; k++){
+                    if(strcmp(trim(field_buffer(field[k], 0)), "") == 0){
+                        mvwprintw(my_form_win, 20, 4, "No deje espacios vacios        ");
+                        wrefresh(my_form_win);
+                        wgetch(my_form_win);
+                        wmove(my_form_win, 20, 4);
+                        wclrtoeol(my_form_win);
+                        wattron(my_form_win, COLOR_PAIR(3));
+                        box(my_form_win, 0, 0);
+	                    wattroff(my_form_win, COLOR_PAIR(3));
+                        set_current_field(my_form, field[k]);
+                        lleno = 0;
+                        break;
+                    }
+                }
+            
+                if(!lleno) break;  // salir si hay campos vacíos
+            
+                if(!esCorreoValido(trim(field_buffer(field[4], 0)))){
+                    mvwprintw(my_form_win, 18, 4, "Vaya, eso no parece un correo  ");
+                    wrefresh(my_form_win);
+                    set_current_field(my_form, field[4]);
+                    break;  //
+                }
 
-    if(!lleno) break;  // salir si hay campos vacíos
 
-    if(!esCorreoValido(trim(field_buffer(field[4], 0)))){
-        mvwprintw(my_form_win, 18, 4, "Vaya, eso no parece un correo  ");
-        wrefresh(my_form_win);
-        break;  //
-    }
-    usuario.peso = atoi(trim(field_buffer(field[5], 0)));
-
-    // Solo llega aquí si todo está lleno Y correo válido
-    strcpy(usuario.username, trim(field_buffer(field[0], 0)));
-    strcpy(usuario.contra,   trim(field_buffer(field[1], 0)));
-    strcpy(usuario.nombre,   trim(field_buffer(field[2], 0)));
-    strcpy(usuario.apellido,   trim(field_buffer(field[3], 0)));
-    strcpy(usuario.correo,   trim(field_buffer(field[4], 0)));
-    usuario.peso = atoi(trim(field_buffer(field[5], 0)));
-    usuario.activo = 1;
-
-    //1Para registrar no admin
-    int status = api_register(shm_p, usuario, msg, 1);
-    if(status == 0){
-        respuesta_form = 1;
-        mvwprintw(my_form_win, 18, 4, "Usuario registrado, haga login ");
-        wrefresh(my_form_win);
-        getch();
-        goto fin;
-    } else {
-        mvwprintw(my_form_win, 18, 3, "%s", msg);
-        wrefresh(my_form_win);
-    }
-    break;
+                usuario.peso = atoi(trim(field_buffer(field[5], 0)));
+                // Solo llega aquí si todo está lleno Y correo válido
+                strcpy(usuario.username, trim(field_buffer(field[0], 0)));
+                strcpy(usuario.contra,   trim(field_buffer(field[1], 0)));
+                if(strlen(usuario.contra)<8){
+                    mvwprintw(my_form_win, 20, 4, "La contrasena es muy corta  ");
+                    wrefresh(my_form_win);
+                    set_current_field(my_form, field[1]);
+                    break;  //
+                }
+                strcpy(usuario.nombre,   trim(field_buffer(field[2], 0)));
+                strcpy(usuario.apellido,   trim(field_buffer(field[3], 0)));
+                strcpy(usuario.correo,   trim(field_buffer(field[4], 0)));
+                usuario.peso = atoi(trim(field_buffer(field[5], 0)));
+                usuario.activo = 1;
+            
+                //1Para registrar no admin
+                int status = api_register(shm_p, usuario, msg, 1);
+                if(status == 0){
+                    respuesta_form = 1;
+                    mvwprintw(my_form_win, 20, 4, "Usuario registrado, haga login ");
+                    wrefresh(my_form_win);
+                    getch();
+                    goto fin;
+                } else {
+                    mvwprintw(my_form_win, 20, 4, "%s", msg);
+                    wrefresh(my_form_win);
+                }
+                break;
+            }
             default:
                 form_driver(my_form, ch);
                 break;

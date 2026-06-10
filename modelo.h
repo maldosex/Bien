@@ -7,6 +7,8 @@
 
 #include <semaphore.h>
 
+#include <time.h>
+
 #define ACTION_LOGIN 1
 #define ACTION_REGISTER 2
 #define ACTION_GET_HABITS 3
@@ -16,7 +18,8 @@
 #define ACTION_REGISTER_HABIT 7
 #define ACTION_UPDATE_USER 8
 #define ACTION_GET_USER 9
-
+#define ACTION_INSERT_REGISTRO 10
+#define ACTION_GET_REGISTROS_USUARIO 11
 
 
 typedef struct{
@@ -52,6 +55,25 @@ typedef struct{
 
 Usuario_t usuario_from_json(cJSON * usuario_json);
 cJSON * usuario_to_json(Usuario_t usuario);
+
+typedef struct{
+    int id;
+    int usuariohabito_id;
+    char fecha[11];
+}Registro_t;
+
+cJSON * registro_to_json(Registro_t registro);
+Registro_t registro_from_json(cJSON * registro_json);
+
+
+typedef struct{
+    int id;
+    char nombre_habito[50];
+    char fecha[11];
+} RegistroVista;
+
+RegistroVista registrovista_from_json(cJSON * registrovista_json);
+cJSON * registrovista_to_json(RegistroVista);
 
 
 typedef struct{
@@ -90,6 +112,9 @@ typedef struct{
     shm_privada *shm;
 
 } cliente_contexto;
+
+
+
 
 
 typedef enum {

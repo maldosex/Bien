@@ -76,6 +76,7 @@ int main(){
     int shmp_fd = shm_open(name_shmem, O_CREAT|O_RDWR, 0666);        
     shm_privada * shm_p = mmap(NULL, sizeof(shm_privada), PROT_READ|PROT_WRITE, MAP_SHARED, shmp_fd, 0);
     int i = 0;
+
     char str_usuario[100];
     char str_contra[100];
 
@@ -88,6 +89,9 @@ int main(){
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
+
+    char msg [50];
+    //api_insert_registro(shm_p, 2, 4, msg);
 
     Screen current = SCREEN_LOGIN_MENU;
 
@@ -214,25 +218,60 @@ int main(){
                     clear();
                     refresh();
                 } else {
-                    menu_my_habits(habitos, count, habito_ids, &selected_count);
+                    menu_my_habits(shm_p, habitos,count, habito_ids, &selected_count, my_id);
                 }
 
                 current = SCREEN_HOME;
                 break;
-        }
+            }
 
             case SCREEN_MY_PROGRESS: {
-                clear();
-                attron(COLOR_PAIR(1));
-                mvprintw(1, (COLS - 10) / 2, "Habit FLOW");
-                attroff(COLOR_PAIR(1));
-                mvprintw(LINES/2 - 1, (COLS - 14) / 2, "Mi Progreso");
-                mvprintw(LINES/2,     (COLS - 38) / 2, "Esta seccion estara disponible pronto.");
-                mvprintw(LINES - 2, 0, "Presione cualquier tecla para volver");
-                refresh();
-                getch();
-                clear();
-                refresh();
+
+                RegistroVista registros[100];
+                int count = 0;
+
+                int status =
+                    api_get_registros_usuario(
+                        shm_p,
+                        registros,
+                        &count
+                    );
+                
+                if(status != 0 || count == 0){
+                
+                    clear();
+                
+                    attron(COLOR_PAIR(1));
+                    mvprintw(1, (COLS - 10) / 2, "Habit FLOW");
+                    attroff(COLOR_PAIR(1));
+                
+                    mvprintw(
+                        LINES / 2,
+                        (COLS - 30) / 2,
+                        "No tienes registros."
+                    );
+                
+                    mvprintw(
+                        LINES - 2,
+                        0,
+                        "Presione cualquier tecla para volver"
+                    );
+                
+                    refresh();
+                    getch();
+                
+                    clear();
+                    refresh();
+                }
+                else{
+                
+                    menu_my_progress(
+                        registros,
+                        count
+                    );
+                
+                }
+            
                 current = SCREEN_HOME;
                 break;
             }

@@ -118,6 +118,67 @@ Usuario_t usuario_from_json(cJSON *usuario_json){
 }
 
 
+cJSON * registro_to_json(Registro_t registro){
+    cJSON * registro_json  = cJSON_CreateObject();
+
+    cJSON_AddNumberToObject(registro_json, "id", registro.id);
+    cJSON_AddNumberToObject(registro_json, "usuariohabito_id", registro.usuariohabito_id);
+    cJSON_AddStringToObject(registro_json, "fecha", registro.fecha);
+    return registro_json;
+}
+Registro_t registro_from_json(cJSON * registro_json){
+
+    Registro_t registro;
+
+    memset(&registro,0,sizeof(Registro_t));
+
+    cJSON * id_json = cJSON_GetObjectItem(registro_json, "id");
+    cJSON * usuariohabito_id_json = cJSON_GetObjectItem(registro_json, "usuariohabito_id");
+    cJSON * fecha_json = cJSON_GetObjectItem(registro_json, "fecha");
+
+    if(cJSON_IsNumber(id_json)){
+        registro.id = id_json->valueint;
+    }
+
+    if(cJSON_IsNumber(usuariohabito_id_json)){
+        registro.usuariohabito_id = usuariohabito_id_json->valueint;
+    }
+
+    if(cJSON_IsString(fecha_json)){
+        strcpy(registro.fecha, fecha_json->valuestring);
+    }
+
+    return registro;
+}
+
+RegistroVista registrovista_from_json(cJSON * registrovista_json){
+    RegistroVista registrovista;
+    memset(&registrovista, 0, sizeof(RegistroVista));
+    cJSON * id_json = cJSON_GetObjectItem(registrovista_json, "id");
+    cJSON * nombre_habito_json = cJSON_GetObjectItem(registrovista_json, "nombre_habito");
+    cJSON * fecha_json = cJSON_GetObjectItem(registrovista_json, "fecha");
+
+    if(cJSON_IsNumber(id_json)){
+        registrovista.id = id_json->valueint;
+    }
+    if(cJSON_IsString(nombre_habito_json)){
+        strcpy(registrovista.nombre_habito, nombre_habito_json->valuestring);
+    }
+    if(cJSON_IsString(fecha_json)){
+        strcpy(registrovista.fecha, fecha_json->valuestring);
+    }
+    return registrovista;
+}
+cJSON * registrovista_to_json(RegistroVista registrovista){
+    cJSON * registrovista_json = cJSON_CreateObject();
+
+    cJSON_AddNumberToObject(registrovista_json, "id", registrovista.id);
+    cJSON_AddStringToObject(registrovista_json, "nombre_habito", registrovista.nombre_habito);
+    cJSON_AddStringToObject(registrovista_json, "fecha", registrovista.fecha);
+    return registrovista_json;
+}
+
+
 Solicitud_t crear_solicitud(int action,const char *data){
 
     Solicitud_t solicitud;

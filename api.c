@@ -309,6 +309,81 @@ int api_register_habit(shm_privada * shm_p, char * nombre){
     
 }
 
+int api_insert_registro(shm_privada *shm_p, int usuario_id, int habito_id, char *msg){
+    cJSON * req_json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(req_json, "usuario_id", usuario_id);
+    cJSON_AddNumberToObject(req_json, "habito_id", habito_id);
+
+
+    char *req_str = cJSON_PrintUnformatted(req_json);
+    Solicitud_t solicitud = crear_solicitud(ACTION_INSERT_REGISTRO, req_str);
+
+    shm_p->solicitud = solicitud;
+    sem_post(&shm_p->solicitud_lista);
+    sem_wait(&shm_p->respuesta_lista);
+
+    strcpy(msg, shm_p->respuesta.msg);
+
+    int estatus = shm_p->respuesta.estatus;
+
+    free(req_str);
+    return estatus;
+}
+
+int api_get_registros_usuario(
+    shm_privada *shm_p,
+    RegistroVista *registros,
+    int *count
+){
+    Solicitud_t solicitud =
+        crear_solicitud(ACTION_GET_REGISTROS_USUARIO, NULL);
+
+    shm_p->solicitud = solicitud;
+
+    sem_post(&shm_p->solicitud_lista);
+
+    sem_wait(&shm_p->respuesta_lista);
+
+    if(shm_p->respuesta.estatus != 0){
+
+        *count = 0;
+
+        return shm_p->respuesta.estatus;
+    }
+
+    cJSON *json_registros =
+        cJSON_Parse(shm_p->respuesta.data);
+
+    if(json_registros == NULL ||
+       !cJSON_IsArray(json_registros)){
+
+        *count = 0;
+
+        if(json_registros != NULL)
+            cJSON_Delete(json_registros);
+
+        return -1;
+    }
+
+    int i = 0;
+
+    cJSON *registro_json = NULL;
+
+    cJSON_ArrayForEach(registro_json, json_registros){
+
+        registros[i] =
+            registrovista_from_json(registro_json);
+
+        i++;
+    }
+
+    *count = i;
+
+    cJSON_Delete(json_registros);
+
+    return 0;
+}
+
     /*
 
 
@@ -370,4 +445,6 @@ int api_add_user_habits(shm_privada * shm_p, Habito * habitos, int count){
     free(req_str);
     return estatus;
 }
+
+
 */

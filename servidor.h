@@ -18,7 +18,9 @@ int handle_user_set_status();
 
 int handle_user_set_password(cliente_contexto *cliente_ctx);
 
-int handle_user_update();
+int handle_user_update(Usuario_t usuario, Respuesta_t * respuesta);
+
+int handle_registro_insert(int habito_id, int usuario_id, Respuesta_t * respuesta);
 
 
 

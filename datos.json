@@ -108,4 +108,14 @@
 		"peso":	72,
 		"activo":	1,
 		"rol":	1
+	}, {
+		"id":	12,
+		"username":	"fafa",
+		"contra":	"23456789",
+		"nombre":	"fafa",
+		"apellido":	"Marquez",
+		"correo":	"rafa@gm.co",
+		"peso":	24,
+		"activo":	1,
+		"rol":	1
 	}]
