@@ -59,7 +59,8 @@ cJSON * usuario_to_json(Usuario_t usuario);
 typedef struct{
     int id;
     int usuariohabito_id;
-    char fecha[11];
+    char fecha[32];
+    char nota[25];
 }Registro_t;
 
 cJSON * registro_to_json(Registro_t registro);
@@ -68,12 +69,22 @@ Registro_t registro_from_json(cJSON * registro_json);
 
 typedef struct{
     int id;
+    int habito_id;
     char nombre_habito[50];
-    char fecha[11];
+    char fecha[32];
+    char nota[25];
 } RegistroVista;
 
 RegistroVista registrovista_from_json(cJSON * registrovista_json);
 cJSON * registrovista_to_json(RegistroVista);
+
+
+
+
+
+
+
+
 
 
 typedef struct{

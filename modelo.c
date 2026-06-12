@@ -124,6 +124,7 @@ cJSON * registro_to_json(Registro_t registro){
     cJSON_AddNumberToObject(registro_json, "id", registro.id);
     cJSON_AddNumberToObject(registro_json, "usuariohabito_id", registro.usuariohabito_id);
     cJSON_AddStringToObject(registro_json, "fecha", registro.fecha);
+    cJSON_AddStringToObject(registro_json, "nota", registro.nota);
     return registro_json;
 }
 Registro_t registro_from_json(cJSON * registro_json){
@@ -135,6 +136,7 @@ Registro_t registro_from_json(cJSON * registro_json){
     cJSON * id_json = cJSON_GetObjectItem(registro_json, "id");
     cJSON * usuariohabito_id_json = cJSON_GetObjectItem(registro_json, "usuariohabito_id");
     cJSON * fecha_json = cJSON_GetObjectItem(registro_json, "fecha");
+    cJSON * nota_json = cJSON_GetObjectItem(registro_json, "nota");
 
     if(cJSON_IsNumber(id_json)){
         registro.id = id_json->valueint;
@@ -147,6 +149,9 @@ Registro_t registro_from_json(cJSON * registro_json){
     if(cJSON_IsString(fecha_json)){
         strcpy(registro.fecha, fecha_json->valuestring);
     }
+    if(cJSON_IsString(nota_json)){
+        strcpy(registro.nota, nota_json->valuestring);
+    }
 
     return registro;
 }
@@ -155,11 +160,16 @@ RegistroVista registrovista_from_json(cJSON * registrovista_json){
     RegistroVista registrovista;
     memset(&registrovista, 0, sizeof(RegistroVista));
     cJSON * id_json = cJSON_GetObjectItem(registrovista_json, "id");
+    cJSON * habito_id_json = cJSON_GetObjectItem(registrovista_json, "habito_id");
     cJSON * nombre_habito_json = cJSON_GetObjectItem(registrovista_json, "nombre_habito");
     cJSON * fecha_json = cJSON_GetObjectItem(registrovista_json, "fecha");
+    cJSON * nota_json = cJSON_GetObjectItem(registrovista_json, "nota");
 
     if(cJSON_IsNumber(id_json)){
         registrovista.id = id_json->valueint;
+    }
+    if(cJSON_IsNumber(habito_id_json)){
+        registrovista.habito_id = habito_id_json->valueint;
     }
     if(cJSON_IsString(nombre_habito_json)){
         strcpy(registrovista.nombre_habito, nombre_habito_json->valuestring);
@@ -167,14 +177,20 @@ RegistroVista registrovista_from_json(cJSON * registrovista_json){
     if(cJSON_IsString(fecha_json)){
         strcpy(registrovista.fecha, fecha_json->valuestring);
     }
+    if(cJSON_IsString(nota_json)){
+        strcpy(registrovista.nota, nota_json->valuestring);
+    }
     return registrovista;
 }
 cJSON * registrovista_to_json(RegistroVista registrovista){
     cJSON * registrovista_json = cJSON_CreateObject();
 
     cJSON_AddNumberToObject(registrovista_json, "id", registrovista.id);
+
+    cJSON_AddNumberToObject(registrovista_json, "habito_id", registrovista.habito_id);
     cJSON_AddStringToObject(registrovista_json, "nombre_habito", registrovista.nombre_habito);
     cJSON_AddStringToObject(registrovista_json, "fecha", registrovista.fecha);
+    cJSON_AddStringToObject(registrovista_json, "nota", registrovista.nota);
     return registrovista_json;
 }
 

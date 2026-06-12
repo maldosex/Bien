@@ -38,4 +38,49 @@
 		"usuario_id":	11,
 		"habito_id":	5,
 		"activo":	1
+	}, {
+		"id":	9,
+		"usuario_id":	12,
+		"habito_id":	1,
+		"activo":	1
+	}, {
+		"id":	10,
+		"usuario_id":	12,
+		"habito_id":	3,
+		"activo":	1
+	}, {
+		"id":	11,
+		"usuario_id":	11,
+		"habito_id":	12,
+		"activo":	1
+	}, {
+		"id":	12,
+		"usuario_id":	11,
+		"habito_id":	13,
+		"activo":	1
+	}, {
+		"id":	13,
+		"usuario_id":	11,
+		"habito_id":	9,
+		"activo":	1
+	}, {
+		"id":	14,
+		"usuario_id":	11,
+		"habito_id":	15,
+		"activo":	1
+	}, {
+		"id":	15,
+		"usuario_id":	11,
+		"habito_id":	17,
+		"activo":	1
+	}, {
+		"id":	16,
+		"usuario_id":	11,
+		"habito_id":	18,
+		"activo":	1
+	}, {
+		"id":	17,
+		"usuario_id":	11,
+		"habito_id":	20,
+		"activo":	1
 	}]

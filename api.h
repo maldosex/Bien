@@ -24,7 +24,7 @@ int api_register_habit(shm_privada * shm_p, char * nombre);
 
 int api_update_user(shm_privada *shm_p, Usuario_t usuario, char *msg);
 
-int api_insert_registro(shm_privada *shm_p, int usuario_id, int habito_id, char *msg);
+int api_insert_registro(shm_privada *shm_p, int usuario_id, int habito_id, char * nota, char *msg);
 int api_get_registros_usuario( shm_privada *shm_p, RegistroVista *registros, int *count);
 
 /*

@@ -100,10 +100,10 @@
 		"rol":	1
 	}, {
 		"id":	11,
-		"username":	"damian",
+		"username":	"ded",
 		"contra":	"2345",
-		"nombre":	"damian",
-		"apellido":	"Delgadi",
+		"nombre":	"ded",
+		"apellido":	"Delgadillo",
 		"correo":	"mald@gmail.co",
 		"peso":	72,
 		"activo":	1,

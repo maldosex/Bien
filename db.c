@@ -428,7 +428,7 @@ int db_registros_insert(Registro_t registro){
 }
 */
 
-int db_registro_insert(int habito_id, int usuario_id){
+int db_registro_insert(int habito_id, int usuario_id, char * nota){
     UsuarioHabito usuariohabito = get_usuario_habito(usuario_id, habito_id);
     Registro_t registro;
     
@@ -445,11 +445,12 @@ int db_registro_insert(int habito_id, int usuario_id){
     int index = db_registros.count;
 
     registro.usuariohabito_id = usuariohabito.id;
+    strcpy(registro.nota, nota);
     
 
     time_t t = time(NULL);
     struct tm *tm_info = localtime(&t);
-    strftime(registro.fecha, sizeof(registro.fecha), "%Y-%m-%d", tm_info);
+    strftime(registro.fecha,sizeof(registro.fecha),"%Y-%m-%d %H:%M:%S",tm_info);
     
     db_registros.registros[index] = registro;
 
@@ -525,11 +526,12 @@ int db_get_registros_usuario(int usuario_id, RegistroVista *salida, int *count){
         // Llenar estructura de salida
         salida[encontrados].id = reg.id;
 
-        strcpy(salida[encontrados].nombre_habito,
-               hab->nombre);
+        salida[encontrados].habito_id = hab->id;
+        strcpy(salida[encontrados].nombre_habito, hab->nombre);
 
-        strcpy(salida[encontrados].fecha,
-               reg.fecha);
+        strcpy(salida[encontrados].fecha, reg.fecha);
+
+        strcpy(salida[encontrados].nota,  reg.nota);
 
         encontrados++;
     }
@@ -540,6 +542,78 @@ int db_get_registros_usuario(int usuario_id, RegistroVista *salida, int *count){
 
     return 0;
 }
+
+int db_get_registros_usuariohabito(int usuario_id, int habito_id, RegistroVista *salida, int *count){
+    int encontrados = 0;
+
+    pthread_mutex_lock(&db_mutex);
+
+    for(int i = 0; i < db_registros.count; i++){
+
+        Registro_t reg = db_registros.registros[i];
+
+        // Buscar el UsuarioHabito correspondiente
+        UsuarioHabito *uh = NULL;
+
+        for(int j = 0; j < db_usuariohabitos.count; j++){
+
+            if(db_usuariohabitos.usuariohabitos[j].id ==
+               reg.usuariohabito_id){
+
+                uh = &db_usuariohabitos.usuariohabitos[j];
+                break;
+            }
+        }
+
+        // No existe la relación
+        if(uh == NULL)
+            continue;
+
+        // No pertenece al usuario solicitado
+        if(uh->usuario_id != usuario_id)
+            continue;
+
+        if(uh->habito_id != habito_id)
+            continue;
+
+        // Buscar el hábito
+        Habito *hab = NULL;
+
+        for(int j = 0; j < db_habitos.count; j++){
+
+            if(db_habitos.habitos[j].id ==
+               uh->habito_id){
+
+                hab = &db_habitos.habitos[j];
+                break;
+            }
+        }
+
+        // No existe el hábito
+        if(hab == NULL)
+            continue;
+
+        // Llenar estructura de salida
+        salida[encontrados].id = reg.id;
+
+        strcpy(salida[encontrados].nombre_habito, hab->nombre);
+
+        strcpy(salida[encontrados].fecha, reg.fecha);
+
+        strcpy(salida[encontrados].nota,  reg.nota);
+
+        encontrados++;
+    }
+
+    *count = encontrados;
+
+    pthread_mutex_unlock(&db_mutex);
+
+    return 0;
+}
+
+
+
 
 /*
 int db_usuariohabito_get(UsuarioHabito * usuariohabito, int *count){
@@ -555,14 +629,29 @@ int db_get_usuarioHabitos_by_usuario_id(UsuarioHabito * usuariohabito, int *coun
 
 //Manejon de archivos:
 
+
+
+
+
 int db_update_user(Usuario_t usuario){
-    int i;
+    int i, j;
     pthread_mutex_lock(&db_usuarios.mutex);
     for(i = 0; i<db_usuarios.count; i++){
         if(db_usuarios.usuarios[i].id == usuario.id){
             break;
         }
     }
+    if(strcmp(db_usuarios.usuarios[i].username, usuario.username)!=0){
+        for(j = 0; j < db_usuarios.count; j++){
+
+            //Si existe se devuelve 1
+            if(strcmp(db_usuarios.usuarios[j].username,usuario.username) == 0){
+                pthread_mutex_unlock(&db_usuarios.mutex);
+                return 1;
+            }
+        }
+    }
+    strcpy(db_usuarios.usuarios[i].username, usuario.username);
     strcpy(db_usuarios.usuarios[i].nombre, usuario.nombre);
     strcpy(db_usuarios.usuarios[i].apellido, usuario.apellido);
     strcpy(db_usuarios.usuarios[i].correo, usuario.correo);

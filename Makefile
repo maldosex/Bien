@@ -13,7 +13,7 @@ $(BIN)/cliente:
 	      gui.c \
 	      cJSON.c \
 	      modelo.c \
-	      -lncurses -lmenu -lform -pthread \
+	      -lncurses -lmenu -lform -lpanel -pthread \
 	      -o $(BIN)/cliente
 
 $(BIN)/servidor:

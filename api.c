@@ -309,10 +309,11 @@ int api_register_habit(shm_privada * shm_p, char * nombre){
     
 }
 
-int api_insert_registro(shm_privada *shm_p, int usuario_id, int habito_id, char *msg){
+int api_insert_registro(shm_privada *shm_p, int usuario_id, int habito_id, char * nota, char *msg){
     cJSON * req_json = cJSON_CreateObject();
     cJSON_AddNumberToObject(req_json, "usuario_id", usuario_id);
     cJSON_AddNumberToObject(req_json, "habito_id", habito_id);
+    cJSON_AddStringToObject(req_json, "nota", nota);
 
 
     char *req_str = cJSON_PrintUnformatted(req_json);

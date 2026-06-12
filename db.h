@@ -73,10 +73,11 @@ cJSON * db_get_auth_info();
 int db_registros_init(const char * filename);
 int db_registros_get_all(Registro_t * registros, int *count);
 //int db_registros_insert(Registro_t registro);
-int db_registro_insert(int habito_id, int usuario_id);
+int db_registro_insert(int habito_id, int usuario_id, char * nota);
 int db_get_registros_by_usuario_id(int usuario_id, Registro_t *registros, int *count);
 UsuarioHabito get_usuario_habito(int usuario_id, int habito_id);
 int db_get_registros_usuario(int usuario_id, RegistroVista *salida, int *count);
+int db_get_registros_usuariohabito(int usuario_id, int habito_id, RegistroVista *salida, int *count);
 
 
 //Manejo de archivos

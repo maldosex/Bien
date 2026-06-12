@@ -280,14 +280,7 @@ int main(){
                 
                 Usuario_t me ;
                 int status = api_get_usuario(shm_p, my_id, &me);
-                printf("status=%d\n", status);
-                printf("username=%s\n", me.username);
-                printf("nombre=%s\n", me.nombre);
-                printf("apellido=%s\n", me.apellido);
-                printf("correo=%s\n", me.correo);
-                printf("peso=%d\n", me.peso);
 
-                getchar();
                 form_update_user(shm_p, me);
 
 
@@ -337,33 +330,50 @@ int main(){
                 break;
             }
             case SCREEN_ADMIN_HABITOS: {
+
                 Habito habitos[50];
                 int count = 0;
                 int selected_id = -1;
                 int status;
+                int op = -1;
 
-                int op;
-                do
-                {
+                do {
+                
                     status = api_get_all_habits(shm_p, habitos, &count);
-                    if(status != 0 || count == 0){
+                
+                    if (status != 0) {
+                    
                         clear();
-                        mvprintw(LINES/2, (COLS - 30) / 2, "No hay habitos disponibles");
+                        mvprintw(LINES / 2, (COLS - 34) / 2, "Error al obtener la lista de habitos");
                         mvprintw(LINES - 2, 0, "Presione cualquier tecla para volver");
                         refresh();
                         getch();
-                        clear();
-                        refresh();
-                    } else {
-                        //el vcalor de returno (op) es para las acciones, (regresar, agregar, eliminar) y con el parametro selected id sse ve cual se eligio
-                        op = menu_administrar_habitos(habitos, count, &selected_id);
-                        //si selecciona agregar:
-                        //Aqui pueden agregarse mas acciones como eliminar si preciona r basandose en el actual
-                        if(op == 0){
-                            form_register_habit(shm_p);
-                        }
-                    } 
-                }while (op!= -1);
+                    
+                        break;
+                    }
+                
+                    op = menu_administrar_habitos(shm_p, habitos, count, &selected_id);
+                
+                    if (op == 1) {
+                        /*
+                         * selected_id contiene el id del hábito seleccionado.
+                         *
+                         * Aquí posteriormente puedes agregar acciones como:
+                         * - editar
+                         * - eliminar
+                         * - generar reporte
+                         */
+                    }
+                
+                    /*
+                     * Si dentro del menú se agregó un nuevo hábito,
+                     * al volver a este punto el ciclo repetirá y
+                     * volverá a consultar api_get_all_habits(),
+                     * mostrando automáticamente la lista actualizada.
+                     */
+                
+                } while (op != -1);
+            
                 current = SCREEN_ADMIN_MENU;
                 break;
             }
