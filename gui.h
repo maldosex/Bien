@@ -22,8 +22,9 @@ int hp_menu();
 
 int menu_my_habits(shm_privada *shm_p, Habito *habitos, int count, int * ids, int *selected_count, int my_id);
 
-int menu_available_habits(Habito *habitos, int count, int * ids, int *selected_count);
+int menu_available_habits(shm_privada *shm_p, Habito *habitos, int count, int * ids, int *selected_count);
 
+void print_logotipe(WINDOW *win, int starty, int startx, int width, chtype color);
 void print_in_middle(WINDOW *win, int starty, int startx, int width, char *string, chtype color);
 
 int log_menu();
@@ -41,6 +42,7 @@ void menu_my_registros(WINDOW *win,
 int build_registros_menu(RegistroVista *registros, int count,int alto_ventana, int ancho_ventana,WINDOW **out_win, MENU **out_menu);
 void draw_registros_win(WINDOW *win, MENU *my_menu, RegistroVista *registros, int ancho_der, int win_h);
 void free_registros_menu(WINDOW *win, MENU *menu);
+
 
 bool esCorreoValido(const char *str);
 

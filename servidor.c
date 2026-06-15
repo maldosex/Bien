@@ -71,7 +71,6 @@ int main(){
     db_habits_get(habitos, &habitos_count);
     printf("Habito 1: %s\n", habitos[0].nombre);
 
-    printf("%s\n", get_data("datos.json"));
 
     Registro_t registros[50];
     int registros_count;

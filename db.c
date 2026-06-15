@@ -132,6 +132,9 @@ int db_habitos_insert(Habito habito){
     }
 
     char *json_str = cJSON_Print(arreglo);
+    for (int i = 0; json_str[i] != '\0'; i++) {
+        json_str[i] = toupper((unsigned char)json_str[i]);
+    }
     file_db_save("habitos.json", json_str);
 
     free(json_str);
@@ -140,7 +143,16 @@ int db_habitos_insert(Habito habito){
     return 0;
 }
 
-int db_habits_get(Habito * habitos, int  *count){
+int comparar_habitos(const void *a, const void *b) {
+    const Habito *habitoA = (const Habito *)a;
+    const Habito *habitoB = (const Habito *)b;
+    
+    // strcasecmp no distingue entre mayúsculas y minúsculas. 
+    // Si prefieres que sea estricto, usa strcmp.
+    return strcasecmp(habitoA->nombre, habitoB->nombre);
+}
+
+int db_habits_get(Habito * habitos, int *count){
 
     pthread_mutex_lock(&db_habitos.mutex);
 
@@ -148,6 +160,11 @@ int db_habits_get(Habito * habitos, int  *count){
 
     memcpy(habitos, db_habitos.habitos, sizeof(Habito) * n);
     *count = n;
+
+    // 2. Ordenar el arreglo local antes de liberar el mutex
+    if (n > 1) {
+        qsort(habitos, n, sizeof(Habito), comparar_habitos);
+    }
 
     pthread_mutex_unlock(&db_habitos.mutex);
 
@@ -361,6 +378,9 @@ int db_habitos_get_by_usuario_id(int usuario_id,Habito *habitos,int *count){
 
     pthread_mutex_unlock(&db_habitos.mutex);
     pthread_mutex_unlock(&db_usuariohabitos.mutex);
+    if (*count > 1) {
+        qsort(habitos, *count, sizeof(Habito), comparar_habitos);
+    }
 
     return 0;
 }
@@ -463,6 +483,7 @@ int db_registro_insert(int habito_id, int usuario_id, char * nota){
     }
 
     char * registros_array_str = cJSON_Print(registros_array_json);
+    
 
     file_db_save("registros.json", registros_array_str);
 

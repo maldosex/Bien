@@ -1,82 +1,70 @@
 [{
-		"id":	1,
-		"nombre":	"Leer"
+		"ID":	1,
+		"NOMBRE":	"LEER"
 	}, {
-		"id":	2,
-		"nombre":	"Ejercitar"
+		"ID":	2,
+		"NOMBRE":	"EJERCITAR"
 	}, {
-		"id":	3,
-		"nombre":	"Limpiar"
+		"ID":	3,
+		"NOMBRE":	"LIMPIAR"
 	}, {
-		"id":	4,
-		"nombre":	"Meditar"
+		"ID":	4,
+		"NOMBRE":	"MEDITAR"
 	}, {
-		"id":	5,
-		"nombre":	"Tomar agua"
+		"ID":	5,
+		"NOMBRE":	"TOMAR AGUA"
 	}, {
-		"id":	6,
-		"nombre":	"Dormir temprano"
+		"ID":	6,
+		"NOMBRE":	"DORMIR TEMPRANO"
 	}, {
-		"id":	7,
-		"nombre":	"Estudiar"
+		"ID":	7,
+		"NOMBRE":	"ESTUDIAR"
 	}, {
-		"id":	8,
-		"nombre":	"Caminar"
+		"ID":	8,
+		"NOMBRE":	"CAMINAR"
 	}, {
-		"id":	9,
-		"nombre":	"Cocinar"
+		"ID":	9,
+		"NOMBRE":	"COCINAR"
 	}, {
-		"id":	10,
-		"nombre":	"Ahorrar dinero"
+		"ID":	10,
+		"NOMBRE":	"AHORRAR"
 	}, {
-		"id":	11,
-		"nombre":	"Escribir diario"
+		"ID":	11,
+		"NOMBRE":	"ESCRIBIR"
+	},{
+		"ID":	12,
+		"NOMBRE":	"DESPERTAR TEMPRANO"
 	}, {
-		"id":	12,
-		"nombre":	"Aprender ingles"
+		"ID":	13,
+		"NOMBRE":	"HACER ESTIRAMIENTOS"
 	}, {
-		"id":	13,
-		"nombre":	"Despertar temprano"
+		"ID":	14,
+		"NOMBRE":	"COMER SALUDABLE"
 	}, {
-		"id":	14,
-		"nombre":	"Hacer estiramientos"
+		"ID":	15,
+		"NOMBRE":	"ESCUCHAR PODCAST"
 	}, {
-		"id":	15,
-		"nombre":	"Comer saludable"
+		"ID":	16,
+		"NOMBRE":	"PRACTICAR PROGRAMACION"
 	}, {
-		"id":	16,
-		"nombre":	"Escuchar podcast"
+		"ID":	17,
+		"NOMBRE":	"ORDENAR HABITACION"
 	}, {
-		"id":	17,
-		"nombre":	"Practicar programacion"
+		"ID":	18,
+		"NOMBRE":	"REDUCIR REDES SOCIALES"
 	}, {
-		"id":	18,
-		"nombre":	"Ordenar habitacion"
+		"ID":	19,
+		"NOMBRE":	"TOMAR VITAMINAS"
+	},{
+		"ID":	20,
+		"NOMBRE":	"SALTAR CUERDA"
+	},{
+		"ID":	21,
+		"NOMBRE":	"ESTUDIAR IDIOMAS"
 	}, {
-		"id":	19,
-		"nombre":	"Reducir redes sociales"
+		"ID":	22,
+		"NOMBRE":	"TRAPEAR"
 	}, {
-		"id":	20,
-		"nombre":	"Tomar vitaminas"
-	}, {
-		"id":	21,
-		"nombre":	"jugar"
-	}, {
-		"id":	22,
-		"nombre":	"fumar"
-	}, {
-		"id":	23,
-		"nombre":	"saltar cuaerda"
-	}, {
-		"id":	24,
-		"nombre":	"comer"
-	}, {
-		"id":	25,
-		"nombre":	"cosaala"
-	}, {
-		"id":	26,
-		"nombre":	"Estudiar Idiomas"
-	}, {
-		"id":	27,
-		"nombre":	"escribir"
+		"ID":	23,
+		"NOMBRE":	"SONREIR"
 	}]

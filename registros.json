@@ -5,127 +5,47 @@
 		"nota":	""
 	}, {
 		"id":	2,
-		"usuariohabito_id":	3,
-		"fecha":	"2026-06-08",
-		"nota":	""
+		"usuariohabito_id":	6,
+		"fecha":	"2026-06-13 00:52:00",
+		"nota":	"10 paginas"
 	}, {
 		"id":	3,
-		"usuariohabito_id":	1,
-		"fecha":	"2026-06-10",
-		"nota":	""
+		"usuariohabito_id":	5,
+		"fecha":	"2026-06-13 00:52:22",
+		"nota":	"Ensalada cesar"
 	}, {
 		"id":	4,
-		"usuariohabito_id":	0,
-		"fecha":	"2026-06-10",
-		"nota":	""
+		"usuariohabito_id":	4,
+		"fecha":	"2026-06-13 00:53:12",
+		"nota":	"10 pesos"
 	}, {
 		"id":	5,
-		"usuariohabito_id":	6,
-		"fecha":	"2026-06-10",
-		"nota":	""
+		"usuariohabito_id":	5,
+		"fecha":	"2026-06-13 00:54:25",
+		"nota":	"Atun"
 	}, {
 		"id":	6,
-		"usuariohabito_id":	7,
-		"fecha":	"2026-06-10",
-		"nota":	""
+		"usuariohabito_id":	6,
+		"fecha":	"2026-06-13 00:57:33",
+		"nota":	"16 paginas"
 	}, {
 		"id":	7,
-		"usuariohabito_id":	7,
-		"fecha":	"2026-05-10",
-		"nota":	""
+		"usuariohabito_id":	6,
+		"fecha":	"2026-06-13 01:08:43",
+		"nota":	"50 paginas"
 	}, {
 		"id":	8,
 		"usuariohabito_id":	8,
-		"fecha":	"2026-06-10",
-		"nota":	""
+		"fecha":	"2026-06-13 01:11:38",
+		"nota":	"1o parrafos"
 	}, {
 		"id":	9,
-		"usuariohabito_id":	7,
-		"fecha":	"2026-06-10",
-		"nota":	""
+		"usuariohabito_id":	9,
+		"fecha":	"2026-06-13 01:13:03",
+		"nota":	"30 minutos"
 	}, {
 		"id":	10,
-		"usuariohabito_id":	6,
-		"fecha":	"2026-06-10",
-		"nota":	""
-	}, {
-		"id":	11,
-		"usuariohabito_id":	6,
-		"fecha":	"2026-06-10",
-		"nota":	""
-	}, {
-		"id":	12,
-		"usuariohabito_id":	7,
-		"fecha":	"2026-06-10",
-		"nota":	""
-	}, {
-		"id":	13,
-		"usuariohabito_id":	7,
-		"fecha":	"2026-06-12",
-		"nota":	"lei tres paginas"
-	}, {
-		"id":	21,
-		"usuariohabito_id":	7,
-		"fecha":	"2026-06-12",
-		"nota":	"fue facil"
-	}, {
-		"id":	22,
-		"usuariohabito_id":	7,
-		"fecha":	"2026-06-12",
-		"nota":	"facil"
-	}, {
-		"id":	23,
-		"usuariohabito_id":	8,
-		"fecha":	"2026-06-12",
-		"nota":	""
-	}, {
-		"id":	24,
-		"usuariohabito_id":	11,
-		"fecha":	"2026-06-12",
-		"nota":	"aprendi 20 palabras"
-	}, {
-		"id":	18,
 		"usuariohabito_id":	12,
-		"fecha":	"2026-06-12",
-		"nota":	""
-	}, {
-		"id":	19,
-		"usuariohabito_id":	11,
-		"fecha":	"2026-06-12",
-		"nota":	""
-	}, {
-		"id":	20,
-		"usuariohabito_id":	7,
-		"fecha":	"2026-06-12",
-		"nota":	""
-	}, {
-		"id":	21,
-		"usuariohabito_id":	15,
-		"fecha":	"2026-06-12",
-		"nota":	"hola mundo"
-	}, {
-		"id":	22,
-		"usuariohabito_id":	15,
-		"fecha":	"2026-06-12",
-		"nota":	"for"
-	}, {
-		"id":	23,
-		"usuariohabito_id":	8,
-		"fecha":	"2026-06-12",
-		"nota":	"8 vasos"
-	}, {
-		"id":	24,
-		"usuariohabito_id":	13,
-		"fecha":	"2026-06-12",
-		"nota":	"pizza"
-	}, {
-		"id":	25,
-		"usuariohabito_id":	14,
-		"fecha":	"2026-06-12",
-		"nota":	"lechuga"
-	}, {
-		"id":	26,
-		"usuariohabito_id":	13,
-		"fecha":	"2026-06-12 17:40:50",
-		"nota":	"chicharron"
+		"fecha":	"2026-06-13 20:38:19",
+		"nota":	"hoy trapie"
 	}]

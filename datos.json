@@ -1,11 +1,11 @@
 [{
 		"id":	1,
-		"username":	"juanx",
-		"contra":	"2345",
-		"nombre":	"juanx",
-		"apellido":	"García",
-		"correo":	"juan.garcia@mail.com",
-		"peso":	70,
+		"username":	"admin",
+		"contra":	"23456789",
+		"nombre":	"admin",
+		"apellido":	"",
+		"correo":	"admin.gen@mail.com",
+		"peso":	0,
 		"activo":	1,
 		"rol":	0
 	}, {
@@ -102,7 +102,7 @@
 		"id":	11,
 		"username":	"ded",
 		"contra":	"2345",
-		"nombre":	"ded",
+		"nombre":	"ca",
 		"apellido":	"Delgadillo",
 		"correo":	"mald@gmail.co",
 		"peso":	72,

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "modelo.h"
 #include <time.h>
+#include<ctype.h>
 
 #ifndef DB_H
 #define DB_H

@@ -60,11 +60,12 @@ void print_logotipe(WINDOW *win, int starty, int startx, int width, chtype color
 
 	wattron(win, color);
 	mvwprintw(win, y,   x, " _   _       _     _ _     _____ _               \n");
-	mvwprintw(win, y+1, x, "| | | | __ _| |__ (_) |_  |  ___| |              \n");
+	mvwprintw(win, y+1, x, "| | | | __ _| |__ (_) |_  |  ___| | _____      __    \n");
 	mvwprintw(win, y+2, x, "| |_| |/ _` | '_ \\| | __| | |_  | |/ _ \\ \\ /\\ / /\n");
 	mvwprintw(win, y+3, x, "|  _  | (_| | |_) | | |_  |  _| | | (_) \\ V  V / \n");
 	mvwprintw(win, y+4, x, "|_| |_|\\__,_|_.__/|_|\\__| |_|   |_|\\___/ \\_/\\_/  \n");
 	wattroff(win, color);
+    
 	refresh();                  
 }
 
@@ -114,9 +115,7 @@ int log_menu()
     int start_x = (ancho_ventana - ancho_logotipo) / 2;
     int centro = ancho_ventana/2;
 
-	
-	init_pair(1, COLOR_RED, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+
 
 	/* Create items */
         n_choices = ARRAY_SIZE(login_menu_choices);
@@ -144,8 +143,6 @@ int log_menu()
         box(my_menu_win, 0, 0);
 	print_in_middle(my_menu_win, 1, 0, 40, "Menu", COLOR_PAIR(2));
     
-
-    print_logotipe(stdscr, 1, start_x, ancho_logotipo, COLOR_PAIR(2));
 
 	mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
 	mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
@@ -205,10 +202,7 @@ int hp_menu()
     int start_x = (ancho_ventana - ancho_logotipo) / 2;
     int centro = ancho_ventana/2;
 	
-    
-	/* Initialize curses */
-	init_pair(1, COLOR_RED, COLOR_BLACK);
-	init_pair(2, COLOR_GREEN, COLOR_BLACK);
+
 
 	/* Create items */
         n_choices = ARRAY_SIZE(hp_menu_choices);
@@ -237,7 +231,7 @@ int hp_menu()
 	mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
 	mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
 	mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
-	mvprintw(LINES - 2, 0, "F1 to exit");
+	mvprintw(LINES - 2, 0, "[Esc] Salir");
     attron(COLOR_PAIR(1));
     print_logotipe(stdscr, 1, start_x, ancho_logotipo, COLOR_PAIR(2));
     attroff(COLOR_PAIR(1));
@@ -249,7 +243,7 @@ int hp_menu()
 	wrefresh(my_menu_win);
 
 	int option = -1;
-	while((c = wgetch(my_menu_win)) != KEY_F(1)){
+	while((c = wgetch(my_menu_win)) != 27){
 		switch(c){	
 			case KEY_DOWN:
 				menu_driver(my_menu, REQ_DOWN_ITEM);
@@ -286,6 +280,7 @@ int hp_menu()
 
 int menu_my_habits(shm_privada * shm_p, Habito *habitos, int count, int * ids, int *selected_count, int my_id){
 
+    
     int i;
     char choices[30][100];
 
@@ -295,27 +290,27 @@ int menu_my_habits(shm_privada * shm_p, Habito *habitos, int count, int * ids, i
     int start_x = (ancho_ventana - ancho_logotipo) / 2;
     int centro = ancho_ventana/2;
 
-    init_pair(1, COLOR_GREEN, COLOR_BLACK);
 
     for(i = 0; i < count; i++){
 
-        snprintf(choices[i], sizeof(choices[i]), "%d - %s", habitos[i].id,  habitos[i].nombre);
+        snprintf(choices[i], sizeof(choices[i]), "%d - %s", i+1,  habitos[i].nombre);
     }
+
+    mvprintw(LINES - 2, 0,
+              "[Esc] salir\t[R] Agregar Registro\t");
+
+    refresh();   // MUY IMPORTANTE
 
 
     ITEM **my_items;
 	int c;				
 	MENU *my_menu;
-    WINDOW *my_menu_win;
+    WINDOW *my_habits_win;
     int n_choices;
 
     WINDOW *win_reg;
 
-    win_reg = newwin(
-        alto_ventana - 5 - 9,
-        50,
-        9,
-        45);
+    win_reg = newwin(alto_ventana - 5 - 9, 50, 9, centro +2);
 
     box(win_reg, 0, 0);
     wrefresh(win_reg);
@@ -329,8 +324,7 @@ int menu_my_habits(shm_privada * shm_p, Habito *habitos, int count, int * ids, i
 	
 
 
-	init_pair(1, COLOR_RED, COLOR_BLACK);
-	init_pair(2, COLOR_GREEN, COLOR_BLACK);
+
 
 	/* Create items */
         n_choices = count +1;
@@ -345,31 +339,36 @@ int menu_my_habits(shm_privada * shm_p, Habito *habitos, int count, int * ids, i
 
 	/* Create the window to be associated with the menu */
     int cols = 40;
-        my_menu_win = newwin(alto_ventana-5-9, cols, 9, 2);
-        keypad(my_menu_win, TRUE);
+    int alto_menu_win;
 
-        set_menu_win(my_menu, my_menu_win);
-        int alto_ventana_habitos = getmaxy(my_menu_win);
-        set_menu_sub(my_menu, derwin(my_menu_win, alto_ventana_habitos-4, cols-2, 3, 1));
+    if ((alto_ventana - 5 - 9) < (count+4))
+        alto_menu_win = alto_ventana - 5 - 9;
+    else
+        alto_menu_win = count+4;
+
+    my_habits_win = newwin(alto_menu_win, cols, 9, centro - cols-2);
+
+    int alto_ventana_habitos = getmaxy(my_habits_win);
+
+    keypad(my_habits_win, TRUE);
+    set_menu_win(my_menu, my_habits_win);
+
+    set_menu_sub(my_menu,derwin(my_habits_win,alto_ventana_habitos - 4,cols - 2,3,1));
+
+    set_menu_format(my_menu,alto_ventana_habitos - 4,1);
+
 
 	/* Set menu mark to the string " * " */
         set_menu_mark(my_menu, " * ");
 
 	/* Print a border around the main window and print a title */
-        box(my_menu_win, 0, 0);
-	print_in_middle(my_menu_win, 1, 0, 40, "-----Mis habitos-----", COLOR_PAIR(1));
-    
-	mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
-	mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
-	mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
-
-
-
-
-    mvprintw(LINES - 2, 0, "[F1] salir\t[R] Agregar Registro\t");
-    attron(COLOR_PAIR(1));
-    print_logotipe(stdscr, 1, start_x, ancho_logotipo, COLOR_PAIR(2));
-    attroff(COLOR_PAIR(1));
+    wattron(my_habits_win, COLOR_PAIR(2));
+        box(my_habits_win, 0, 0);\
+        mvwaddch(my_habits_win, 2, 0, ACS_LTEE);
+	mvwhline(my_habits_win, 2, 1, ACS_HLINE, 38);
+	mvwaddch(my_habits_win, 2, 39, ACS_RTEE);
+    wattroff(my_habits_win, COLOR_PAIR(2));
+	print_in_middle(my_habits_win, 1, 0, 40, "-----Mis habitos-----", COLOR_PAIR(1));
 
 	menu_opts_off(my_menu, O_ONEVALUE);
 	refresh();
@@ -377,10 +376,12 @@ int menu_my_habits(shm_privada * shm_p, Habito *habitos, int count, int * ids, i
 
 	/* Post the menu */
 	post_menu(my_menu);
-	wrefresh(my_menu_win);
+	wrefresh(my_habits_win);
 
 	int option = -1;
-	while((c = wgetch(my_menu_win)) != KEY_F(1)){
+    int h, w;
+    getmaxyx(my_habits_win, h, w);
+	while((c = wgetch(my_habits_win)) != 27){
 		switch(c){	
 			case KEY_DOWN:
 				menu_driver(my_menu, REQ_DOWN_ITEM);
@@ -414,19 +415,22 @@ int menu_my_habits(shm_privada * shm_p, Habito *habitos, int count, int * ids, i
 
                 char msg[100];
                 char nota[50];
-                form_nota(shm_p, my_menu_win, nota);
+                int enviar = form_nota(shm_p, my_habits_win, nota);
 
-                api_insert_registro(shm_p, my_id,habitos[index].id, nota, msg);
-                int h, w;
-                getmaxyx(my_menu_win, h, w);
+                if(enviar == 0){
+                    api_insert_registro(shm_p, my_id,habitos[index].id, nota, msg);
+                    
 
-                mvwprintw(my_menu_win, h - 2, 2, "%s", msg);
-                wrefresh(my_menu_win);
+                    //mvwprintw(my_habits_win, h - 2, 2, "%s", msg);
+
+                    api_get_registros_usuario(shm_p,registros, &count_registros);
+                    wrefresh(my_habits_win);
+                }
+                
                 break;
                 
             }
 		}
-         api_get_registros_usuario(shm_p,registros, &count_registros);
         ITEM *current = current_item(my_menu);
 
         if(current != NULL)
@@ -445,9 +449,15 @@ int menu_my_habits(shm_privada * shm_p, Habito *habitos, int count, int * ids, i
                 }
             }
             wrefresh(stdscr);
+            werase(win_reg);
+
+            char txt[60];
+            snprintf(txt,sizeof(txt),"%s \ttotal: %d", habitos[index].nombre, count_registroshabito);
+
+            print_in_middle(win_reg,1,0,getmaxx(win_reg), txt ,COLOR_PAIR(1));
             menu_my_registros(win_reg,registroshabito,count_registroshabito);}
 
-        wrefresh(my_menu_win);
+        wrefresh(my_habits_win);
 		if (option != -1) {
             break;
         }
@@ -461,7 +471,9 @@ int menu_my_habits(shm_privada * shm_p, Habito *habitos, int count, int * ids, i
                 free_item(my_items[i]);
 
     
-	clear();
+    delwin(win_reg);
+    delwin(my_habits_win);
+    clear();
     refresh();
 	return option;
 }
@@ -477,12 +489,6 @@ int form_nota(shm_privada *shm_p, WINDOW *root, char *nota)
     int rows, cols;
     int respuesta_form = -1;
 
-    init_pair(1, COLOR_CYAN,  COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-
-    init_pair(3, COLOR_BLACK, COLOR_WHITE);
-    init_pair(4, COLOR_RED,   COLOR_BLACK);
-    init_pair(5, COLOR_GREEN, COLOR_BLACK);
 
     /*------------------*/
     /* Crear formulario */
@@ -582,6 +588,8 @@ int form_nota(shm_privada *shm_p, WINDOW *root, char *nota)
 
                 /* Limpiar únicamente la línea de mensajes */
                 mvwhline(win, 7, 2, ' ', w - 4);
+
+                respuesta_form = 0;
 
                 goto cleanup;;
                 wrefresh(win);
@@ -701,12 +709,16 @@ void actualizar_registros_habito(RegistroVista *registros,int count_registros,in
     wrefresh(reg_win);
 }
 
-int menu_available_habits(Habito *habitos, int count, int * ids, int *selected_count){
+int menu_available_habits(shm_privada *shm_p, Habito *habitos, int count, int * ids, int *selected_count){
     int i;
-    char choices[30][100];
-    init_pair(1, COLOR_RED, COLOR_BLACK);
+    char choices[100][100];
+    int ancho_ventana = getmaxx(stdscr); 
+    int alto_ventana = getmaxy(stdscr);
+    int ancho_logotipo = 40; 
+    int start_x = (ancho_ventana - ancho_logotipo) / 2;
+    int centro = ancho_ventana/2;
     for(i = 0; i < count; i++){
-        snprintf(choices[i], sizeof(choices[i]), "%d - %s", habitos[i].id, habitos[i].nombre);
+        snprintf(choices[i], sizeof(choices[i]), "%-4d - %s", i+1, habitos[i].nombre);
     }
 
     ITEM **my_items;
@@ -715,7 +727,6 @@ int menu_available_habits(Habito *habitos, int count, int * ids, int *selected_c
     WINDOW *my_menu_win;
     int n_choices;
 
-    init_pair(1, COLOR_RED, COLOR_BLACK);
 
     n_choices = count + 1;
     my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
@@ -726,11 +737,20 @@ int menu_available_habits(Habito *habitos, int count, int * ids, int *selected_c
 
     my_menu = new_menu((ITEM **)my_items);
 
-    my_menu_win = newwin(10, 40, 4, 20);
+    int cols = 40;
+    int alto_menu_win;
+    if((alto_ventana-5-9)<count){
+        alto_menu_win = alto_ventana-5-9;
+    }
+    else
+        alto_menu_win = count;
+    my_menu_win = newwin(alto_menu_win, cols, 9, centro-cols/2);
+
+    int alto_ventana_menu = getmaxy(my_menu_win);
     keypad(my_menu_win, TRUE);
     set_menu_win(my_menu, my_menu_win);
-    set_menu_sub(my_menu, derwin(my_menu_win, 6, 38, 3, 1));
-    set_menu_format(my_menu, 5, 1); 
+    set_menu_sub(my_menu, derwin(my_menu_win, alto_ventana_menu-4, cols-2, 3, 1));
+    set_menu_format(my_menu, alto_ventana_menu-4, 1); 
 
     set_menu_mark(my_menu, " * ");
 
@@ -739,13 +759,7 @@ int menu_available_habits(Habito *habitos, int count, int * ids, int *selected_c
     mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
     mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
     mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
-    mvprintw(LINES - 5, 0, "Espacio para seleccionar");
-    mvprintw(LINES - 4, 0, "Enter para aceptar y agregar");
-    mvprintw(LINES - 4, 0, "Flechas para desplazar");
-    mvprintw(LINES - 2, 0, "F1 to exit | PgUp/PgDn para desplazar una pagina");
-    attron(COLOR_PAIR(1));
-    mvprintw(1, 20, "Habit FLOW");
-    attroff(COLOR_PAIR(1));
+    mvprintw(LINES - 2, 0, "[Esc] Salir\t [Espacio] Seleccionar\t [Enter] registrar seleccion");
     menu_opts_off(my_menu, O_ONEVALUE);
     refresh();
 
@@ -753,7 +767,7 @@ int menu_available_habits(Habito *habitos, int count, int * ids, int *selected_c
     wrefresh(my_menu_win);
 
     int option = -1;
-    while((c = wgetch(my_menu_win)) != KEY_F(1)){
+    while((c = wgetch(my_menu_win)) != 27){
         switch(c){  
             case KEY_DOWN:
                 menu_driver(my_menu, REQ_DOWN_ITEM);
@@ -780,12 +794,11 @@ int menu_available_habits(Habito *habitos, int count, int * ids, int *selected_c
                     }
                 }
                 *selected_count = seleccionados;
-                option = 1;
+                api_register_usuariohabitos(shm_p, ids, *selected_count);
                 break;
             }
         }
         wrefresh(my_menu_win);
-        if (option != -1) break;
     }   
 
     unpost_menu(my_menu);
@@ -805,7 +818,7 @@ void menu_my_registros(WINDOW *win,
     int i;
     char texto[120];
 
-    werase(win);
+    
     box(win, 0, 0);
 
    
@@ -813,7 +826,6 @@ void menu_my_registros(WINDOW *win,
     mvwaddch(win, 2, 0, ACS_LTEE);
     mvwhline(win, 2, 1, ACS_HLINE, getmaxx(win) - 2);
     mvwaddch(win, 2, getmaxx(win) - 1, ACS_RTEE);
-     print_in_middle(win,1,0,getmaxx(win),registros[0].nombre_habito,COLOR_PAIR(1));
 
     for(i = 0; i < count && i < getmaxy(win) - 5; i++)
     {
@@ -830,10 +842,14 @@ int menu_my_progress(RegistroVista *registros, int count){
 
     int i;
     int c;
+    int ancho_ventana = getmaxx(stdscr); 
+    int alto_ventana = getmaxy(stdscr);
+    int ancho_logotipo = 40; 
+    int start_x = (ancho_ventana - ancho_logotipo) / 2;
+    int centro = ancho_ventana/2;
 
     char choices[100][120];
 
-    init_pair(1, COLOR_RED, COLOR_BLACK);
 
     for(i = 0; i < count; i++){
 
@@ -859,13 +875,22 @@ int menu_my_progress(RegistroVista *registros, int count){
 
     my_menu = new_menu(my_items);
 
-    my_menu_win = newwin(16, 50, 4, 20);
+    int cols = 50;
+    int alto_menu_win;
+    if((alto_ventana-5-9)<(count+7)){
+        alto_menu_win = alto_ventana-5-9;
+    }
+    else
+        alto_menu_win = count+7;
+    my_menu_win = newwin(alto_menu_win, cols, 9, centro-cols/2);
+
+    int alto_ventana_menu = getmaxy(my_menu_win);
 
     keypad(my_menu_win, TRUE);
 
     set_menu_win(my_menu, my_menu_win);
 
-    set_menu_sub( my_menu, derwin( my_menu_win, 9, 0, 3, 1));
+    set_menu_sub( my_menu, derwin(my_menu_win, alto_ventana_menu-3, cols-2, 3, 1));
 
     set_menu_format( my_menu, 8, 1);
 
@@ -873,16 +898,17 @@ int menu_my_progress(RegistroVista *registros, int count){
 
     box(my_menu_win, 0, 0);
 
-    print_in_middle( my_menu_win, 1, 0, 50, "----- Mi progreso -----", COLOR_PAIR(1));
+    print_in_middle( my_menu_win, 1, 0, 50, "----- Mi progreso -----", COLOR_PAIR(2));
 
     mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
     mvwhline(my_menu_win, 2, 1, ACS_HLINE, 48);
     mvwaddch(my_menu_win, 2, 49, ACS_RTEE);
 
-    mvwaddch(my_menu_win, 13, 0, ACS_LTEE);
-    mvwhline(my_menu_win, 13, 1, ACS_HLINE, 48);
+    mvwaddch(my_menu_win, alto_menu_win-3, 0, ACS_LTEE);
+    mvwhline(my_menu_win, alto_menu_win-3, 1, ACS_HLINE, 48);
+    mvwaddch(my_menu_win, alto_menu_win-3, 49, ACS_RTEE);
 
-    mvprintw(LINES - 2,0,"F1 para volver | PgUp/PgDn para desplazarse");
+    mvprintw(LINES - 2,0,"[Esc] Salir");
 
     refresh();
 
@@ -890,7 +916,7 @@ int menu_my_progress(RegistroVista *registros, int count){
 
     wrefresh(my_menu_win);
 
-    while((c = wgetch(my_menu_win)) != KEY_F(1)){
+    while((c = wgetch(my_menu_win)) != 27){
 
         switch(c){
 
@@ -913,8 +939,8 @@ int menu_my_progress(RegistroVista *registros, int count){
 
         ITEM *cur = current_item(my_menu);
         int idx = item_index(cur);
-        mvwprintw(my_menu_win, 14, 1, "                           ");
-        mvwprintw(my_menu_win, 14, 1, "Nota: %s", registros[idx].nota);
+        mvwprintw(my_menu_win,  alto_menu_win-2, 1, "                           ");
+        mvwprintw(my_menu_win, alto_menu_win-2, 1, "Nota: %s", registros[idx].nota);
         refresh();
         wrefresh(my_menu_win);
     }
@@ -949,10 +975,6 @@ int form_login(shm_privada *shm_p, char * usuario, char * contra, int *my_id){
     int ch, rows, cols;
 
 
-    init_pair(1, COLOR_CYAN, COLOR_BLACK);
-    init_pair(2, COLOR_WHITE, COLOR_BLUE);
-	init_pair(3, COLOR_GREEN, COLOR_BLACK);
-
     // Definición de campos
     field[0] = new_field(1, 20, 2, 14, 0, 0); // Usuario
     field[1] = new_field(1, 20, 4, 14, 0, 0); // Contraseña
@@ -960,6 +982,7 @@ int form_login(shm_privada *shm_p, char * usuario, char * contra, int *my_id){
 
     set_field_back(field[0], A_UNDERLINE);
     set_field_back(field[1], A_UNDERLINE);
+    
     
     // Ocultar caracteres en el campo de contraseña
     field_opts_off(field[1], O_PUBLIC); 
@@ -971,14 +994,12 @@ int form_login(shm_privada *shm_p, char * usuario, char * contra, int *my_id){
     my_form_win = newwin(10, 40, (LINES-10)/2, (COLS-40)/2);
     keypad(my_form_win, TRUE);
 
-	wattron(my_form_win, COLOR_PAIR(3));
     box(my_form_win, 0, 0);
-	wattroff(my_form_win, COLOR_PAIR(3));
 
     set_form_win(my_form, my_form_win);
     set_form_sub(my_form, derwin(my_form_win, rows, cols, 2, 2));
 
-    print_in_middle(my_form_win, 1, 0, 40, " LOGIN", COLOR_PAIR(1));
+    print_in_middle(my_form_win, 1, 0, 40, " LOGIN", COLOR_PAIR(2));
     
     post_form(my_form);
 
@@ -990,7 +1011,6 @@ int form_login(shm_privada *shm_p, char * usuario, char * contra, int *my_id){
 	set_current_field(my_form, field[0]);
 	pos_form_cursor(my_form);
 
-	mvprintw(LINES-2, 2, "Presione F1 para salir");
 	refresh();
     
     wrefresh(my_form_win);
@@ -1005,7 +1025,7 @@ int form_login(shm_privada *shm_p, char * usuario, char * contra, int *my_id){
     while((ch = wgetch(my_form_win))) {
         
         switch(ch) {
-            case KEY_F(1):
+            case 27:
                 respuesta_form = -1;
                 goto cleanup;
                 break;
@@ -1062,11 +1082,6 @@ int form_register(shm_privada * shm_p){
     Usuario_t usuario;
 
 
-	init_pair(1, COLOR_CYAN, COLOR_BLACK);    // titulo
-	init_pair(2, COLOR_RED, COLOR_BLUE);   // campo activo
-	init_pair(3, COLOR_WHITE, COLOR_BLUE);   // texto
-	init_pair(4, COLOR_RED, COLOR_BLACK);     // borde
-
     // Definición de campos
     field[0] = new_field(1, 20, 2, 14, 0, 0); // Usuario
     field[1] = new_field(1, 20, 5, 14, 0, 0); // Contraseña
@@ -1079,8 +1094,8 @@ int form_register(shm_privada * shm_p){
     set_field_type(field[5], TYPE_INTEGER, 0, 0, 500);
 
 	for(int i = 0; i<6; i++){
-		set_field_back(field[i], COLOR_PAIR(2));
-		set_field_fore(field[i], COLOR_PAIR(3));
+		set_field_back(field[i], COLOR_PAIR(4));
+		set_field_fore(field[i], COLOR_PAIR(4));
 		field_opts_off(field[i], O_AUTOSKIP);
 	}
     
@@ -1091,7 +1106,7 @@ int form_register(shm_privada * shm_p){
     scale_form(my_form, &rows, &cols);
 
     // Crear ventana centrada
-    my_form_win = newwin(22, 50, (LINES-24)/2, (COLS-50)/2);
+    my_form_win = newwin(22, 50, (LINES-24)/2+3, (COLS-50)/2);
     keypad(my_form_win, TRUE);
 
 	wattron(my_form_win, COLOR_PAIR(3));
@@ -1101,23 +1116,25 @@ int form_register(shm_privada * shm_p){
     set_form_win(my_form, my_form_win);
     set_form_sub(my_form, derwin(my_form_win, rows, cols, 2, 2));
 
-    print_in_middle(my_form_win, 1, 0, 50, "Registrar Usuario", COLOR_PAIR(1));
+    print_in_middle(my_form_win, 1, 0, 50, "Registrar Usuario", COLOR_PAIR(2));
     
     post_form(my_form);
 
     
     // Etiquetas de texto
+    wattron(my_form_win, COLOR_PAIR(3));
     mvwprintw(my_form_win, 4, 4, "Usuario:");
-    mvwprintw(my_form_win, 7, 4, "Contrasea:");
+    mvwprintw(my_form_win, 7, 4, "ContraseNa:");
     mvwprintw(my_form_win, 10, 4, "Nombre:");
     mvwprintw(my_form_win, 13, 4, "Apellido:");
     mvwprintw(my_form_win, 16, 4, "Correo:");
-    mvwprintw(my_form_win, 19, 4, "Peso:");
+    mvwprintw(my_form_win, 19, 4, "Peso (Kg):");
+    wattroff(my_form_win, COLOR_PAIR(3));
 
 	set_current_field(my_form, field[0]);
 	pos_form_cursor(my_form);
 
-	mvprintw(LINES-2, 2, "ENTER = Registrar   F1 = Salir");
+	mvprintw(LINES-2, 2, "[Esc] Salir \t[ENTER] Registrar");
 	refresh();
     
     wrefresh(my_form_win);
@@ -1128,7 +1145,7 @@ int form_register(shm_privada * shm_p){
     char msg[50];
     while((ch = wgetch(my_form_win))) {
         switch(ch) {
-            case KEY_F(1):
+            case 27:
                 respuesta_form = -1;
                 goto fin;
                 break;
@@ -1231,11 +1248,6 @@ int form_update_user(shm_privada *shm_p, Usuario_t usuario)
     WINDOW *my_form_win;
     int ch, rows, cols;
 
-    init_pair(1, COLOR_CYAN, COLOR_BLACK);
-    init_pair(2, COLOR_BLACK, COLOR_WHITE);
-    init_pair(3, COLOR_WHITE, COLOR_BLACK);
-    init_pair(4, COLOR_RED, COLOR_BLACK);
-
     field[0] = new_field(1, 20, 2, 14, 0, 0);   // Usuario
     field[1] = new_field(1, 20, 5, 14, 0, 0);   // Nombre
     field[2] = new_field(1, 20, 8, 14, 0, 0);   // Apellido
@@ -1246,8 +1258,8 @@ int form_update_user(shm_privada *shm_p, Usuario_t usuario)
     set_field_type(field[4], TYPE_INTEGER, 0, 0, 500);
 
     for (int i = 0; i < 5; i++) {
-        set_field_back(field[i], COLOR_PAIR(2));
-        set_field_fore(field[i], COLOR_PAIR(3));
+		set_field_back(field[i], COLOR_PAIR(4));
+		set_field_fore(field[i], COLOR_PAIR(4));
         field_opts_off(field[i], O_AUTOSKIP);
     }
 
@@ -1274,7 +1286,7 @@ int form_update_user(shm_privada *shm_p, Usuario_t usuario)
     set_form_sub(my_form, derwin(my_form_win, rows, cols, 2, 2));
 
     print_in_middle(my_form_win, 1, 0, 50,
-                    "Editar usuario", COLOR_PAIR(1));
+                    "Editar usuario", COLOR_PAIR(2));
 
     post_form(my_form);
 
@@ -1288,7 +1300,7 @@ int form_update_user(shm_privada *shm_p, Usuario_t usuario)
     pos_form_cursor(my_form);
 
     mvprintw(LINES - 2, 2,
-             "ENTER = Guardar   F1 = Cancelar");
+             "[ENTER] Guardar   [Esc] Cancelar");
 
     refresh();
     wrefresh(my_form_win);
@@ -1300,7 +1312,7 @@ int form_update_user(shm_privada *shm_p, Usuario_t usuario)
 
         switch (ch) {
 
-            case KEY_F(1):
+            case  27:
                 goto fin;
 
             case KEY_BACKSPACE:
@@ -1406,11 +1418,11 @@ int form_show_user(Usuario_t usuario, int y, int x){
     FORM *my_form;
     WINDOW *detalles_win;
     int ch, rows, cols;
-
-    init_pair(1, COLOR_CYAN, COLOR_BLACK);
-    init_pair(2, COLOR_BLACK, COLOR_WHITE);
-    init_pair(3, COLOR_WHITE, COLOR_BLACK);
-    init_pair(4, COLOR_RED, COLOR_BLACK);
+    int ancho_ventana = getmaxx(stdscr); 
+    int alto_ventana = getmaxy(stdscr);
+    int ancho_logotipo = 40; 
+    int start_x = (ancho_ventana - ancho_logotipo) / 2;
+    int centro = ancho_ventana/2;
 
 
     /* Precargar datos */
@@ -1420,7 +1432,7 @@ int form_show_user(Usuario_t usuario, int y, int x){
 
 
 
-    detalles_win = newwin(20, 50, y, x);
+    detalles_win = newwin(alto_ventana - 5 - 9, 50, 9, centro +2);
     keypad(detalles_win, TRUE);
 
     box(detalles_win, 0, 0);
@@ -1475,10 +1487,15 @@ int admin_menu()
 	MENU *my_menu;
     WINDOW *my_menu_win;
     int n_choices, i;
+
+    int ancho_ventana = getmaxx(stdscr); 
+    int alto_ventana = getmaxy(stdscr);
+    int ancho_logotipo = 40; 
+    int start_x = (ancho_ventana - ancho_logotipo) / 2;
+    int centro = ancho_ventana/2;
 	
     
 	/* Initialize curses */
-	init_pair(1, COLOR_RED, COLOR_BLACK);
 
 	/* Create items */
         n_choices = ARRAY_SIZE(admin_menu_choices);
@@ -1490,26 +1507,32 @@ int admin_menu()
 	my_menu = new_menu((ITEM **)my_items);
 
 	/* Create the window to be associated with the menu */
-        my_menu_win = newwin(10, 40, 4, 20);
+    int cols = 40;
+    int alto_menu_win;
+    if((alto_ventana-5-9)<n_choices+3){
+        alto_menu_win = alto_ventana-5-9;
+    }
+    else
+        alto_menu_win = n_choices+3;
+    my_menu_win = newwin(alto_menu_win, cols, 9, centro-cols/2);
+
+    int alto_ventana_menu = getmaxy(my_menu_win);
         keypad(my_menu_win, TRUE);
      
 	/* Set main window and sub window */
         set_menu_win(my_menu, my_menu_win);
-        set_menu_sub(my_menu, derwin(my_menu_win, 6, 38, 3, 1));
+        set_menu_sub(my_menu, derwin(my_menu_win, alto_ventana_menu-4, cols-2, 3, 1));
 
 	/* Set menu mark to the string " * " */
         set_menu_mark(my_menu, " * ");
 
 	/* Print a border around the main window and print a title */
         box(my_menu_win, 0, 0);
-	print_in_middle(my_menu_win, 1, 0, 40, "Modulos Admin", COLOR_PAIR(1));
+	print_in_middle(my_menu_win, 1, 0, 40, "----Admin----", COLOR_PAIR(1));
 	mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
 	mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
 	mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
-	mvprintw(LINES - 2, 0, "F1 to exit");
-    attron(COLOR_PAIR(1));
-    mvprintw(1, 35, "-------ADMIN-------");
-    attroff(COLOR_PAIR(1));
+	mvprintw(LINES - 2, 0, "[Esc] Salir");
 	refresh();
         
 
@@ -1518,7 +1541,7 @@ int admin_menu()
 	wrefresh(my_menu_win);
 
 	int option = -1;
-	while((c = wgetch(my_menu_win)) != KEY_F(1)){
+	while((c = wgetch(my_menu_win))  != 27){
 		switch(c){	
 			case KEY_DOWN:
 				menu_driver(my_menu, REQ_DOWN_ITEM);
@@ -1556,8 +1579,6 @@ int menu_administrar_usuarios(Usuario_t *usuarios, int count, int *selected_id){
     int i;
     char choices[50][100];
 
-    init_pair(1, COLOR_RED, COLOR_BLACK);
-
     for(i = 0; i < count; i++){
         snprintf(choices[i], sizeof(choices[i]), "%d - %s", usuarios[i].id, usuarios[i].username);
     }
@@ -1567,6 +1588,11 @@ int menu_administrar_usuarios(Usuario_t *usuarios, int count, int *selected_id){
     MENU *my_menu;
     WINDOW *my_menu_win;
     int n_choices;
+    int ancho_ventana = getmaxx(stdscr); 
+    int alto_ventana = getmaxy(stdscr);
+    int ancho_logotipo = 40; 
+    int start_x = (ancho_ventana - ancho_logotipo) / 2;
+    int centro = ancho_ventana/2;
 
     n_choices = count + 1;
     my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
@@ -1577,11 +1603,20 @@ int menu_administrar_usuarios(Usuario_t *usuarios, int count, int *selected_id){
 
     my_menu = new_menu((ITEM **)my_items);
 
-    my_menu_win = newwin(20, 40, 4, 5);
+    int cols = 40;
+    int alto_menu_win;
+    if((alto_ventana-5-9)<count+4){
+        alto_menu_win = alto_ventana-5-9;
+    }
+    else
+        alto_menu_win = count+4;
+    my_menu_win = newwin(alto_menu_win, cols, 9, centro-cols-2);
+    int alto_ventana_menu = getmaxy(my_menu_win);
+
     keypad(my_menu_win, TRUE);
     set_menu_win(my_menu, my_menu_win);
-    set_menu_sub(my_menu, derwin(my_menu_win, 14, 38, 3, 1));
-    set_menu_format(my_menu, 12, 1);
+    set_menu_sub(my_menu, derwin(my_menu_win, alto_ventana_menu-4, cols-2, 3, 1));
+    set_menu_format(my_menu, alto_ventana_menu - 4,1);
     set_menu_mark(my_menu, " * ");
 
     box(my_menu_win, 0, 0);
@@ -1589,10 +1624,7 @@ int menu_administrar_usuarios(Usuario_t *usuarios, int count, int *selected_id){
     mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
     mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
     mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
-    mvprintw(LINES - 2, 0, "F1 to exit");
-    attron(COLOR_PAIR(1));
-    mvprintw(1, 20, "Habit FLOW");
-    attroff(COLOR_PAIR(1));
+    mvprintw(LINES - 2, 0, "[Esc] Salir");
 
     menu_opts_off(my_menu, O_ONEVALUE);
     refresh();
@@ -1600,7 +1632,7 @@ int menu_administrar_usuarios(Usuario_t *usuarios, int count, int *selected_id){
     wrefresh(my_menu_win);
 
     int option = -1;
-    while((c = wgetch(my_menu_win)) != KEY_F(1)){
+    while((c = wgetch(my_menu_win)) != 27){
 
         
         

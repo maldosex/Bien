@@ -84,11 +84,23 @@ int main(){
     
 
     initscr();
+    set_escdelay(50);
     start_color();
 	curs_set(1);
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+    init_pair(1, COLOR_BLACK, COLOR_GREEN);
+    init_pair(3, COLOR_WHITE, COLOR_BLACK);
+    init_pair(4, COLOR_BLACK, COLOR_WHITE);
+
+    int ancho_logotipo = 40; 
+
+        int ancho_ventana = getmaxx(stdscr); 
+
+        int start_x = (ancho_ventana - ancho_logotipo) / 2;
+        print_logotipe(stdscr, 1, start_x, ancho_logotipo, COLOR_PAIR(2));
 
     char msg [50];
     //api_insert_registro(shm_p, 2, 4, msg);
@@ -96,8 +108,21 @@ int main(){
     Screen current = SCREEN_LOGIN_MENU;
 
     while (current != SCREEN_EXIT) {
+        int ancho_ventana = getmaxx(stdscr); 
+        int alto_ventana = getmaxy(stdscr);
+        
+        int start_x = (ancho_ventana - ancho_logotipo) / 2;
+        int centro = ancho_ventana/2;
+        print_logotipe(stdscr, 1, start_x, ancho_logotipo, COLOR_PAIR(2));
+          // o werase(stdscr);
+        mvprintw(LINES-2, 0, "                                           ");
+
+
+
+        refresh();
 
         switch(current) {
+            
 
             case SCREEN_LOGIN_MENU: {
                 int op = log_menu();
@@ -174,11 +199,8 @@ int main(){
                 int selected_count = 0;
 
                 if(status == 0){
-                    int result = menu_available_habits(habitos, count, habitos_ids, &selected_count);
+                    int result = menu_available_habits(shm_p, habitos, count, habitos_ids, &selected_count);
 
-                    if(result == 1 && selected_count > 0){ 
-                        api_register_usuariohabitos(shm_p, habitos_ids, selected_count);
-                    }
                 }
                 else{
                 
@@ -207,9 +229,6 @@ int main(){
 
                 if(status != 0 || count == 0){
                     clear();
-                    attron(COLOR_PAIR(1));
-                    mvprintw(1, (COLS - 10) / 2, "Habit FLOW");
-                    attroff(COLOR_PAIR(1));
                     mvprintw(LINES/2, (COLS - 38) / 2, "Aun no tienes habitos registrados.");
                     mvprintw(LINES/2 + 1, (COLS - 44) / 2, "Ve a 'Habit Store' para agregar habitos.");
                     mvprintw(LINES - 2, 0, "Presione cualquier tecla para volver");
